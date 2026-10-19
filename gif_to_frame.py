@@ -12,13 +12,14 @@ NOTE: make sure the gif is in the images folder
 """
 fileName = sys.argv[1]
 fileLabel = sys.argv[2]
+folder = sys.argv[3]
 
 gif = Image.open("images/" + fileName)
 
 frames = []
 frameNum = 0
 for frame in ImageSequence.Iterator(gif):
-    frame.save(f"images/{fileLabel}_frame{frameNum}.png", "PNG")
+    frame.save(f"images/{folder}/{fileLabel}_frame{frameNum}.png", "PNG")
     frameNum += 1
 
 
