@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,pycharm
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,pycharm
 
+.__pycache__/
+
 ### macOS ###
 # General
 .DS_Store
