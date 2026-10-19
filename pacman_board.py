@@ -3,6 +3,7 @@
 #
 
 import arcade
+from arcade import BasicSprite
 
 # Board Configuration
 TILE_SIZE = 20
@@ -29,35 +30,35 @@ HEADER_HEIGHT = 55 # For score section
 
 RAW_MAZE = [
     "############################",
-    "#............##............#",
-    "#.####.#####.##.#####.####.#",
-    "#.####.#####.##.#####.####.#",
-    "#..........................#",
-    "#.####.##.########.##.####.#",
-    "#......##....##....##......#",
-    "######.##### ## #####.######",
-    "     #.##### ## #####.#      ",
-    "     #.##          ##.#      ",
-    "######.## ###  ### ##.######",
-    "      .   #      #   .      ",
-    "######.## #      # ##.######",
-    "     #.## ######## ##.#      ",
-    "     #.##          ##.#      ",
-    "######.## ######## ##.######",
-    "#............##............#",
-    "#.####.#####.##.#####.####.#",
-    "#....#................#....#",
-    "####.#.##.########.##.#.####",
-    "#......##....##....##......#",
-    "#.##########.##.##########.#",
-    "#..........................#",
-    "#.####.#####.##.#####.####.#",
-    "#...##................##...#",
-    "###.##.##.########.##.##.###",
-    "#......##....##....##......#",
-    "#.############ ############.#",
-    "#..........................#",
-    "############################",
+    "#            ##            #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "#                          #",
+    "# #### ## ######## ## #### #",
+    "# #### ## ######## ## #### #",
+    "#      ##    ##    ##      #",
+    "###### ##### ## ##### ######",
+    "     # ##### ## ##### #     ",
+    "     # ##          ## #     ",
+    "###### ## ###  ### ## ######",
+    "          #      #          ",
+    "###### ## #      # ## ######",
+    "     # ## ######## ## #     ",
+    "     # ##          ## #     ",
+    "     # ## ######## ## #     ",
+    "###### ## ######## ## ######",
+    "#            ##            #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "#   ##                ##   #",
+    "### ## ## ######## ## ## ###",
+    "### ## ## ######## ## ## ###",
+    "#      ##    ##    ##      #",
+    "# ########## ## ########## #",
+    "# ########## ## ########## #",
+    "#                          #",
+    "############################"
 ]
 
 # Verify dimensions
@@ -74,6 +75,16 @@ SCREEN_HEIGHT = BOARD_HEIGHT + HEADER_HEIGHT + 2 * MARGIN
 HIGH_SCORE = "140"
 CURRENT_SCORE = "100"
 
+class Wall(arcade.SpriteSolidColor):
+
+    def __init__(self,x,y):
+
+        super().__init__(
+            width=TILE_SIZE, height=TILE_SIZE,
+            color=WALL_FILL,
+            center_x=x, center_y=y
+        )
+
 # Create window
 
 class PacmanBoard(arcade.Window):
@@ -85,6 +96,10 @@ class PacmanBoard(arcade.Window):
         )
 
         arcade.set_background_color(BACKGROUND)
+
+        self.wall_list = arcade.SpriteList()
+
+        self.create_walls()
 
         self.high_score_label = arcade.Text(
             "HIGH SCORE",
@@ -137,37 +152,32 @@ class PacmanBoard(arcade.Window):
         y = MARGIN + (ROWS - 1 - row) * TILE_SIZE + TILE_SIZE / 2
         return x, y
 
-    # Draw maze
-    def draw_maze(self):
+    # Create Walls
+    def create_walls(self):
         for row in range(ROWS):
             for col in range(COLS):
-                cell = MAZE[row][col]
-                x,y = self.cell_center(row, col)
+                if MAZE[row][col] == "#":
+                    x, y = self.cell_center(row, col)
 
-                if cell == "#":
-                    arcade.draw_rect_filled(
-                        arcade.XYWH(
-                            x, y,
-                            TILE_SIZE - 2, TILE_SIZE - 2
-                        ),
-                        WALL_FILL
-                    )
+                    wall = Wall(x,y)
 
-                    arcade.draw_rect_outline(
-                        arcade.XYWH(
-                            x, y,
-                            TILE_SIZE - 2, TILE_SIZE - 2
-                        ),
-                        WALL_COLOR,
-                        border_width = 2
-                    )
+                    self.wall_list.append(wall)
 
-                elif cell == ".":
-                    arcade.draw_circle_filled(
-                        x, y,
-                        2.5,
-                        PELLET_COLOR
-                    )
+    # Draw maze
+    def draw_maze(self):
+
+        self.wall_list.draw()
+
+        # Wall outline
+        for wall in self.wall_list:
+            arcade.draw_rect_outline(
+                arcade.XYWH(
+                    wall.center_x, wall.center_y,
+                    TILE_SIZE, TILE_SIZE
+                ),
+                WALL_COLOR, border_width=2
+            )
+
 
     def draw_header(self):
         # Draw the existing text objects on the screen.
