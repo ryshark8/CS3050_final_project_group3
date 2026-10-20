@@ -7,14 +7,16 @@ template.
 If Python and Arcade are installed, this example can be run from the command line with:
 python -m arcade.examples.starting_template
 """
+
+# some module imports
 import arcade
 
+# some file imports
+from config import *
 import level1_board
 import pacman_board
+from pacman import Pacman
 
-WINDOW_WIDTH = 550
-WINDOW_HEIGHT = 700
-WINDOW_TITLE = "PACMAN"
 
 TILE_SIZE = 15
 LABEL_SIZE = 14
@@ -82,12 +84,21 @@ class GameView(arcade.View):
 
         # If you have sprite lists, you should create them here,
         # and set them to None
+
+        # set class lists to none
+        self.sprites = None
         self.levels = None
+
         self.current_level = None
         self.wall_list = None
         self.ghost_wall_list = None
         self.current_score_label = None
         self.current_score = None
+
+        # init pacman
+        self.pacman = None
+
+        self.reset()
 
     def setup(self):
         self.levels = []
@@ -100,10 +111,15 @@ class GameView(arcade.View):
         self.wall_list = level.wall_list
         self.ghost_wall_list = level.ghost_wall_list
 
+        # sprites
+        self.sprites = arcade.SpriteList()
+        self.pacman = Pacman(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+        self.sprites.append(self.pacman)
+
     def reset(self):
         """Reset the game to the initial state."""
         # Do changes needed to restart the game here if you want to support that
-        pass
+
 
     def on_draw(self):
         """
@@ -119,13 +135,16 @@ class GameView(arcade.View):
         level.board.draw_maze()
         level.board.draw_header()
 
+        # draw the sprites
+        self.sprites.draw()
+
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
         Normally, you'll call update() on the sprite lists that
         need it.
         """
-        pass
+        self.sprites.update(delta_time)
 
     def on_key_press(self, key, key_modifiers):
         """
@@ -134,13 +153,14 @@ class GameView(arcade.View):
         For a full list of keys, see:
         https://api.arcade.academy/en/latest/arcade.key.html
         """
-        pass
+        # move pacman
+        self.pacman.on_key_press(key, key_modifiers)
 
     def on_key_release(self, key, key_modifiers):
         """
         Called whenever the user lets off a previously pressed key.
         """
-        pass
+        self.pacman.on_key_release(key, key_modifiers)
 
     def on_mouse_motion(self, x, y, delta_x, delta_y):
         """

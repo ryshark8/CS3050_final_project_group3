@@ -8,7 +8,7 @@ from pathlib import Path
 
 # some constants
 MOVEMENT_SPEED = 5
-RADIUS = 30
+RADIUS = 13
 MOUTH_INTERVAL = 0.1
 IMAGE_DIR = Path(__file__).parent / "images/pacman"
 
@@ -24,7 +24,7 @@ class Pacman(arcade.Sprite):
 
         self.mouth_timer = 0.0
 
-    def update(self, delta_time: float = 1 / 60):
+    def update(self, delta_time: float = 1 / 60, **kwargs):
         # movement (change_x / change_y are built into Sprite)
         self.center_x += self.change_x
         self.center_y += self.change_y
@@ -41,7 +41,7 @@ class Pacman(arcade.Sprite):
                 else:
                     self.texture = self.open_texture
 
-    def key_press(self, key, modifiers):
+    def on_key_press(self, key, modifiers):
         if key == arcade.key.UP:
             self.change_y = MOVEMENT_SPEED
             self.angle = 270
@@ -55,7 +55,7 @@ class Pacman(arcade.Sprite):
             self.change_x = MOVEMENT_SPEED
             self.angle = 0
 
-    def key_release(self, key, modifiers):
+    def on_key_release(self, key, modifiers):
         if key in (arcade.key.UP, arcade.key.DOWN):
             self.change_y = 0
         elif key in (arcade.key.LEFT, arcade.key.RIGHT):
