@@ -1,6 +1,6 @@
 import arcade
 from pathlib import Path
-from ghost import Ghost
+from ghosts.ghost import Ghost
 import random
 
 class Blinky(Ghost):
@@ -11,7 +11,7 @@ class Blinky(Ghost):
 
         super().__init__()
 
-        sprite_files = Path("../images/ghosts/blinky")
+        sprite_files = Path("images/ghosts/blinky")
 
         frames = [
             arcade.load_texture(str(frame))

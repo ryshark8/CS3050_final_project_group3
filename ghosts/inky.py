@@ -1,6 +1,6 @@
 import arcade
 from pathlib import Path
-from ghost import Ghost
+from ghosts.ghost import Ghost
 import random
 
 class Inky(Ghost):
@@ -11,7 +11,7 @@ class Inky(Ghost):
 
         super().__init__()
 
-        sprite_files = Path("../images/ghosts/inky")
+        sprite_files = Path("images/ghosts/inky")
 
         frames = [
             arcade.load_texture(str(frame))

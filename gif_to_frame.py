@@ -7,6 +7,7 @@ Run using "python gif_to_frame.py gifFilname fileLabel"
 
 gifFilename: file name of gif
 fileLabel: what you would like each frame to be named (frame number will be added as well) ex. blinky -> blinky_frame1.png
+folder: name of the folder where you'd like the frames to go
 
 NOTE: make sure the gif is in the images folder
 """

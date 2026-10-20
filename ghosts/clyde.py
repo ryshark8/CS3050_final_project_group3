@@ -1,6 +1,6 @@
 import arcade
 from pathlib import Path
-from ghost import Ghost
+from ghosts.ghost import Ghost
 import random
 
 class Clyde(Ghost):
@@ -11,7 +11,7 @@ class Clyde(Ghost):
 
         super().__init__()
 
-        sprite_files = Path("../images/ghosts/clyde")
+        sprite_files = Path("images/ghosts/clyde")
 
         frames = [
             arcade.load_texture(str(frame))
