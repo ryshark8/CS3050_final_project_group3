@@ -13,7 +13,7 @@ class Ghost(arcade.Sprite):
         super().__init__(self)
 
         self.elapsed_time = 0
-        self.scale = 3
+        self.scale = 1.5
         self.animation_timer = 0
         self.found = False
         self.speed = 3

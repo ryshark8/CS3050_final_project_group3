@@ -4,16 +4,11 @@ from blinky import Blinky
 from pinky import Pinky
 from inky import Inky
 from clyde import Clyde
+from config import *
 
 """
 JUST TO GET THINGS TO DISPLAY
 """
-
-# Constants
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-WINDOW_TITLE = "Platformer"
-
 
 class GameView(arcade.Window):
     """
