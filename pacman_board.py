@@ -1,173 +1,145 @@
 #
-# Script for first draft of gameboard
+# Script for creating gameboard
 #
 
 import arcade
 
-# Board Configuration
-TILE_SIZE = 20
-COLS = 28
-ROWS = 31
-LABEL_POSITION = 32
-HIGH_SCORE_POSITION = 12
-SCORE_POSITION = 50
-LABEL_SIZE = 14
-SCORE_SIZE = 12
+import level1_board
 
-# RGB Colors
-BACKGROUND = (5, 5, 12)
-WALL_COLOR = (40, 50, 255)
-WALL_FILL = (10, 10, 35)
-PELLET_COLOR = (255, 220, 100)
+LINE_COLOR = (40, 50, 255)
+FILL_COLOR = (10, 10, 100)
 
-# Window Configuration
-MARGIN = 20
-HEADER_HEIGHT = 55 # For score section
 
-# Literal maze configuration
-# '#' = wall, '.' = pellet, ' ' = empty
+class Wall(arcade.SpriteSolidColor):
 
-RAW_MAZE = [
-    "############################",
-    "#............##............#",
-    "#.####.#####.##.#####.####.#",
-    "#.####.#####.##.#####.####.#",
-    "#..........................#",
-    "#.####.##.########.##.####.#",
-    "#......##....##....##......#",
-    "######.##### ## #####.######",
-    "     #.##### ## #####.#      ",
-    "     #.##          ##.#      ",
-    "######.## ###  ### ##.######",
-    "      .   #      #   .      ",
-    "######.## #      # ##.######",
-    "     #.## ######## ##.#      ",
-    "     #.##          ##.#      ",
-    "######.## ######## ##.######",
-    "#............##............#",
-    "#.####.#####.##.#####.####.#",
-    "#....#................#....#",
-    "####.#.##.########.##.#.####",
-    "#......##....##....##......#",
-    "#.##########.##.##########.#",
-    "#..........................#",
-    "#.####.#####.##.#####.####.#",
-    "#...##................##...#",
-    "###.##.##.########.##.##.###",
-    "#......##....##....##......#",
-    "#.############ ############.#",
-    "#..........................#",
-    "############################",
-]
+    def __init__(self, x, y, tile_size):
 
-# Verify dimensions
-MAZE = [row.ljust(COLS)[:COLS] for row in RAW_MAZE]
-ROWS = len(MAZE)
+        super().__init__(
+            width=tile_size+4, height=tile_size+4,
+            color=LINE_COLOR,
+            center_x=x, center_y=y
+        )
 
-# Set window dimensions
-BOARD_WIDTH = COLS * TILE_SIZE
-BOARD_HEIGHT = ROWS * TILE_SIZE
+class GhostWall(arcade.SpriteSolidColor):
 
-SCREEN_WIDTH = BOARD_WIDTH + 2 * MARGIN
-SCREEN_HEIGHT = BOARD_HEIGHT + HEADER_HEIGHT + 2 * MARGIN
+    def __init__(self, x, y, tile_size):
 
-HIGH_SCORE = "140"
-CURRENT_SCORE = "100"
+        super().__init__(
+            width=tile_size, height=tile_size/4,
+            color=LINE_COLOR,
+            center_x=x, center_y=y
+        )
 
 # Create window
 
-class PacmanBoard(arcade.Window):
-    def __init__(self):
-        super().__init__(
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            "Pac-Man Board 1"
-        )
+class PacmanBoard:
+    def __init__(self, level):
 
-        arcade.set_background_color(BACKGROUND)
+        self.level = level
+
+        self.tile_size = level.tile_size
+        self.label_size = level.label_size
+        self.score_size = level.score_size
+        self.label_position = level.label_position
+        self.score_position = level.score_position
+        self.high_score_position = level.high_score_position
+        self.margin = level.margin
+        self.header_height = level.header_height
+        self.rows = level.rows
+        self.cols = level.cols
+        self.maze = level.maze
+        self.screen_width = level.screen_width
+        self.screen_height = level.screen_height
+        self.board_width = level.board_width
+        self.board_height = level.board_height
+
+
+        self.wall_list = arcade.SpriteList()
+        self.ghost_wall_list = arcade.SpriteList()
+
+        self.create_walls()
 
         self.high_score_label = arcade.Text(
             "HIGH SCORE",
-            SCREEN_WIDTH / 2,
-            MARGIN + BOARD_HEIGHT + LABEL_POSITION,
+            self.screen_width / 2,
+            self.margin + self.board_height + self.label_position,
             arcade.color.WHITE,
-            font_size = LABEL_SIZE,
+            font_size = self.label_size,
             anchor_x = "center"
         )
 
         # Create the high-score number.
         self.high_score_number = arcade.Text(
             "140",
-            SCREEN_WIDTH / 2,
-            MARGIN + BOARD_HEIGHT + HIGH_SCORE_POSITION,
+            self.screen_width / 2,
+            self.margin + self.board_height + self.high_score_position,
             arcade.color.WHITE,
-            font_size = SCORE_SIZE,
+            font_size = self.score_size,
             anchor_x = "center"
         )
 
         self.current_score_label = arcade.Text(
             "CURRENT SCORE",
-            MARGIN + SCORE_POSITION,
-            MARGIN + BOARD_HEIGHT + LABEL_POSITION,
+            self.margin + self.score_position,
+            self.margin + self.board_height + self.label_position,
             arcade.color.WHITE,
-            font_size = LABEL_SIZE,
+            font_size = self.label_size,
             anchor_x = "center"
         )
 
         # Create the current-score number on the left.
         self.current_score = arcade.Text(
             "0",
-            MARGIN + SCORE_POSITION,
-            MARGIN + BOARD_HEIGHT + HIGH_SCORE_POSITION,
+            self.margin + self.score_position,
+            self.margin + self.board_height + self.high_score_position,
             arcade.color.WHITE,
-            font_size = SCORE_SIZE,
+            font_size = self.score_size,
             anchor_x = "center"
         )
-
-    def on_draw(self):
-        self.clear()
-        self.draw_header()
-        self.draw_maze()
 
     # Convert grid coordinates to screen coordinates
     def cell_center(self, row, col):
         # Find horizontal center of tile
-        x = MARGIN + col * TILE_SIZE + TILE_SIZE / 2
+        x = self.margin + col * self.tile_size + self.tile_size / 2
         # Find vertical center of tile
-        y = MARGIN + (ROWS - 1 - row) * TILE_SIZE + TILE_SIZE / 2
+        y = self.margin + (self.rows - 1 - row) * self.tile_size + self.tile_size / 2
         return x, y
+
+    # Create Walls
+    def create_walls(self):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self.maze[row][col] == "#":
+                    x, y = self.cell_center(row, col)
+
+                    wall = Wall(x,y, self.tile_size)
+
+                    self.wall_list.append(wall)
+
+                if self.maze[row][col] == "-":
+                    x, y = self.cell_center(row, col)
+
+                    wall = GhostWall(x,y, self.tile_size)
+
+                    self.ghost_wall_list.append(wall)
+
+
 
     # Draw maze
     def draw_maze(self):
-        for row in range(ROWS):
-            for col in range(COLS):
-                cell = MAZE[row][col]
-                x,y = self.cell_center(row, col)
 
-                if cell == "#":
-                    arcade.draw_rect_filled(
-                        arcade.XYWH(
-                            x, y,
-                            TILE_SIZE - 2, TILE_SIZE - 2
-                        ),
-                        WALL_FILL
-                    )
+        self.wall_list.draw()
+        self.ghost_wall_list.draw()
 
-                    arcade.draw_rect_outline(
-                        arcade.XYWH(
-                            x, y,
-                            TILE_SIZE - 2, TILE_SIZE - 2
-                        ),
-                        WALL_COLOR,
-                        border_width = 2
-                    )
-
-                elif cell == ".":
-                    arcade.draw_circle_filled(
-                        x, y,
-                        2.5,
-                        PELLET_COLOR
-                    )
+        # Wall outline
+        for wall in self.wall_list:
+            arcade.draw_rect_filled(
+                arcade.XYWH(
+                    wall.center_x, wall.center_y,
+                    self.tile_size, self.tile_size
+                ),
+                color=FILL_COLOR
+            )
 
     def draw_header(self):
         # Draw the existing text objects on the screen.
@@ -175,9 +147,3 @@ class PacmanBoard(arcade.Window):
         self.high_score_number.draw()
         self.current_score_label.draw()
         self.current_score.draw()
-
-
-if __name__ == '__main__':
-    game = PacmanBoard()
-    arcade.run()
-
