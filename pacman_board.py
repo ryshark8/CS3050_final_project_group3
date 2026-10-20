@@ -6,14 +6,27 @@ import arcade
 
 import level1_board
 
+LINE_COLOR = (40, 50, 255)
+FILL_COLOR = (10, 10, 100)
+
 
 class Wall(arcade.SpriteSolidColor):
 
     def __init__(self, x, y, tile_size):
 
         super().__init__(
-            width=tile_size+2, height=tile_size+2,
-            color=(40, 50, 255),
+            width=tile_size+4, height=tile_size+4,
+            color=LINE_COLOR,
+            center_x=x, center_y=y
+        )
+
+class GhostWall(arcade.SpriteSolidColor):
+
+    def __init__(self, x, y, tile_size):
+
+        super().__init__(
+            width=tile_size, height=tile_size/4,
+            color=LINE_COLOR,
             center_x=x, center_y=y
         )
 
@@ -42,6 +55,7 @@ class PacmanBoard:
 
 
         self.wall_list = arcade.SpriteList()
+        self.ghost_wall_list = arcade.SpriteList()
 
         self.create_walls()
 
@@ -102,10 +116,20 @@ class PacmanBoard:
 
                     self.wall_list.append(wall)
 
+                if self.maze[row][col] == "-":
+                    x, y = self.cell_center(row, col)
+
+                    wall = GhostWall(x,y, self.tile_size)
+
+                    self.ghost_wall_list.append(wall)
+
+
+
     # Draw maze
     def draw_maze(self):
 
         self.wall_list.draw()
+        self.ghost_wall_list.draw()
 
         # Wall outline
         for wall in self.wall_list:
@@ -114,7 +138,7 @@ class PacmanBoard:
                     wall.center_x, wall.center_y,
                     self.tile_size, self.tile_size
                 ),
-                color=(10, 10, 25)
+                color=FILL_COLOR
             )
 
     def draw_header(self):
