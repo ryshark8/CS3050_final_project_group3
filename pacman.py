@@ -1,98 +1,62 @@
 """
-This is the file that I am working in to get pac man on a board and moving around
+Pac-Man sprite
 """
 
-# some imports
 import arcade
+from config import *
+from pathlib import Path
 
 # some constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Pacman"
 MOVEMENT_SPEED = 5
 RADIUS = 30
-MOUTH_INTERVAL = 0.10 # seconds
+MOUTH_INTERVAL = 0.1
+IMAGE_DIR = Path(__file__).parent / "images/pacman"
 
-class Pacman(arcade.Window):
-    def __init__(self, width, height, title):
-        super().__init__(width, height, title)
-        arcade.set_background_color(arcade.color.BLACK)
 
-        self.x = 300
-        self.y = 300
-        self.change_x = 0
-        self.change_y = 0
-        self.tilt = 0
+class Pacman(arcade.Sprite):
+    def __init__(self, x, y):
+        self.open_texture = arcade.load_texture(IMAGE_DIR / "right_frame1.png")
+        self.closed_texture = arcade.load_texture(IMAGE_DIR / "right_frame2.png")
+        super().__init__(self.open_texture, center_x=x, center_y=y)
 
-        # mouth animation
-        self.start_angle = 45
-        self.end_angle = 315
+        # scale the image so he is RADIUS * 2 pixels wide, whatever the file size
+        self.scale = (RADIUS * 2) / self.open_texture.width
+
         self.mouth_timer = 0.0
 
-    def on_draw(self):
-        """Called when we draw something, well everything"""
-        self.clear()
-        # this is code (mostly) taken from here
-        # https://api.arcade.academy/en/3.3.3/api_docs/api/drawing_primitives.html
-        # it is what draws pacman
-        arcade.draw_arc_filled(
-            center_x=self.x,
-            center_y=self.y,
-            width=RADIUS * 2,
-            height=RADIUS * 2,
-            color=arcade.color.YELLOW,
-            start_angle=self.start_angle,
-            end_angle=self.end_angle,
-            tilt_angle=self.tilt,
-            num_segments=128
-        )
+    def update(self, delta_time: float = 1 / 60):
+        # movement (change_x / change_y are built into Sprite)
+        self.center_x += self.change_x
+        self.center_y += self.change_y
+        self.center_x = max(RADIUS, min(WINDOW_WIDTH - RADIUS, self.center_x))
+        self.center_y = max(RADIUS, min(WINDOW_HEIGHT - RADIUS, self.center_y))
 
-    def on_key_press(self, key, modifiers):
-        """called when a key is pressed"""
+        # mouth animation
+        if self.change_x or self.change_y:
+            self.mouth_timer += delta_time
+            if self.mouth_timer >= MOUTH_INTERVAL:
+                self.mouth_timer = 0.0
+                if self.texture is self.open_texture:
+                    self.texture = self.closed_texture
+                else:
+                    self.texture = self.open_texture
+
+    def key_press(self, key, modifiers):
         if key == arcade.key.UP:
             self.change_y = MOVEMENT_SPEED
-            self.tilt = 270
+            self.angle = 270
         elif key == arcade.key.DOWN:
             self.change_y = -MOVEMENT_SPEED
-            self.tilt = 90
+            self.angle = 90
         elif key == arcade.key.LEFT:
             self.change_x = -MOVEMENT_SPEED
-            self.tilt = 180
+            self.angle = 180
         elif key == arcade.key.RIGHT:
             self.change_x = MOVEMENT_SPEED
-            self.tilt = 0
+            self.angle = 0
 
-    def on_key_release(self, key, modifiers):
-        """Called when the user releases a key."""
+    def key_release(self, key, modifiers):
         if key in (arcade.key.UP, arcade.key.DOWN):
             self.change_y = 0
         elif key in (arcade.key.LEFT, arcade.key.RIGHT):
             self.change_x = 0
-
-    def on_update(self, delta_time):
-        """
-        Move pacman and keep him on the screen
-        This runs about 60 times a second, so any animation
-        not using a timer will just flicker, see mouth movement
-        """
-        self.x += self.change_x
-        self.y += self.change_y
-        self.x = max(RADIUS, min(SCREEN_WIDTH - RADIUS, self.x))
-        self.y = max(RADIUS, min(SCREEN_HEIGHT - RADIUS, self.y))
-
-        # animate the movement of his mouth
-        if self.change_x or self.change_y:
-            self.mouth_timer += delta_time
-            if self.mouth_timer >= MOUTH_INTERVAL:
-                if self.start_angle == 45:
-                    self.start_angle = 0
-                    self.end_angle = 360
-                else:
-                    self.start_angle = 45
-                    self.end_angle = 315
-
-def pacman():
-    Pacman(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    arcade.run()
-
-pacman()
