@@ -1,9 +1,3 @@
-from ghosts.blinky import Blinky
-from ghosts.pinky import Pinky
-from ghosts.inky import Inky
-from ghosts.clyde import Clyde
-
-
 """
 Starting Template
 
@@ -22,6 +16,11 @@ from config import *
 import level1_board
 import pacman_board
 from pacman import Pacman
+
+from ghosts.blinky import Blinky
+from ghosts.pinky import Pinky
+from ghosts.inky import Inky
+from ghosts.clyde import Clyde
 
 
 TILE_SIZE = 15
@@ -121,14 +120,34 @@ class GameView(arcade.View):
         self.ghost_wall_list = level.ghost_wall_list
 
         # sprites
+        # pacman
         self.sprites = arcade.SpriteList()
-        self.pacman = Pacman(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+
+        # coords for where to spawn pacman, right below the ghost prison or whatever
+        spawn_x = 275
+        spawn_y = 290
+
+        self.pacman = Pacman(spawn_x, spawn_y)
         self.sprites.append(self.pacman)
+
+        # call the physics engine for collisions
+        self.pacman_walls = arcade.SpriteList()
+        self.pacman_walls.extend(self.wall_list)
+        self.pacman_walls.extend(self.ghost_wall_list)
+
+        # engine for pacman
+        self.physics_engine = arcade.PhysicsEngineSimple(self.pacman, self.pacman_walls)
+
+        # one engine for each of the ghost
+        self.ghost_engines = [
+            arcade.PhysicsEngineSimple(ghost, self.wall_list)
+            for ghost in self.ghost_list
+        ]
 
     def reset(self):
         """Reset the game to the initial state."""
         # Do changes needed to restart the game here if you want to support that
-
+        pass
 
     def on_draw(self):
         """
@@ -159,8 +178,13 @@ class GameView(arcade.View):
         need it.
         """
         self.ghost_list.update()
-        pass
         self.sprites.update(delta_time)
+
+        # pacman engine update
+        self.physics_engine.update()
+
+        for engine in self.ghost_engines:
+            engine.update()
 
     def on_key_press(self, key, key_modifiers):
         """

@@ -7,8 +7,8 @@ from config import *
 from pathlib import Path
 
 # some constants
-MOVEMENT_SPEED = 5
-RADIUS = 13
+MOVEMENT_SPEED = 2
+RADIUS = 10
 MOUTH_INTERVAL = 0.1
 IMAGE_DIR = Path(__file__).parent / "images/pacman"
 
