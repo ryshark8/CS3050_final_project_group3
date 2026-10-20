@@ -34,6 +34,7 @@ class Level:
                  screen_width, screen_height, board_width, board_height):
 
         self.wall_list = arcade.SpriteList()
+        self.ghost_wall_list = arcade.SpriteList()
 
         self.tile_size = tile_size
         self.label_size = label_size
@@ -60,6 +61,7 @@ def setup_level1():
     level1.board = pacman_board.PacmanBoard(level1)
 
     level1.wall_list = level1.board.wall_list
+    level1.ghost_wall_list = level1.board.ghost_wall_list
 
     return level1
 
@@ -83,6 +85,9 @@ class GameView(arcade.View):
         self.levels = None
         self.current_level = None
         self.wall_list = None
+        self.ghost_wall_list = None
+        self.current_score_label = None
+        self.current_score = None
 
     def setup(self):
         self.levels = []
@@ -93,6 +98,7 @@ class GameView(arcade.View):
         self.current_level = 0
 
         self.wall_list = level.wall_list
+        self.ghost_wall_list = level.ghost_wall_list
 
     def reset(self):
         """Reset the game to the initial state."""
@@ -161,7 +167,7 @@ def main():
     # Create a window class. This is what actually shows up on screen
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 
-    # Create and setup the GameView
+    # Create and set up the GameView
     game = GameView()
 
     game.setup()
@@ -171,7 +177,6 @@ def main():
 
     # Start the arcade game loop
     arcade.run()
-
 
 
 if __name__ == "__main__":
