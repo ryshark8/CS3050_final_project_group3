@@ -14,11 +14,8 @@ If Python and Arcade are installed, this example can be run from the command lin
 python -m arcade.examples.starting_template
 """
 import arcade
-
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-WINDOW_TITLE = "Starting Template"
-
+from pacman import Pacman
+from config import *
 
 class GameView(arcade.View):
     """
@@ -39,11 +36,16 @@ class GameView(arcade.View):
         
         # If you have sprite lists, you should create them here,
         # and set them to None
+        self.sprites = None
+        self.pacman = None
+        self.reset()
 
     def reset(self):
         """Reset the game to the initial state."""
         # Do changes needed to restart the game here if you want to support that
-        pass
+        self.sprites = arcade.SpriteList()
+        self.pacman = Pacman(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+        self.sprites.append(self.pacman)
 
     def on_draw(self):
         """
@@ -55,6 +57,7 @@ class GameView(arcade.View):
         
         self.clear()
         self.ghost_list.draw()
+        self.sprites.draw()
         # Call draw() on all your sprite lists below
         
 
@@ -66,39 +69,22 @@ class GameView(arcade.View):
         """
         self.ghost_list.update()
         pass
+        self.sprites.update(delta_time)
 
-    def on_key_press(self, key, key_modifiers):
+    def on_key_press(self, key, modifiers):
         """
         Called whenever a key on the keyboard is pressed.
 
         For a full list of keys, see:
         https://api.arcade.academy/en/latest/arcade.key.html
         """
-        pass
+        self.pacman.key_press(key, modifiers)
 
-    def on_key_release(self, key, key_modifiers):
+    def on_key_release(self, key, modifiers):
         """
         Called whenever the user lets off a previously pressed key.
         """
-        pass
-
-    def on_mouse_motion(self, x, y, delta_x, delta_y):
-        """
-        Called whenever the mouse moves.
-        """
-        pass
-
-    def on_mouse_press(self, x, y, button, key_modifiers):
-        """
-        Called when the user presses a mouse button.
-        """
-        pass
-
-    def on_mouse_release(self, x, y, button, key_modifiers):
-        """
-        Called when a user releases a mouse button.
-        """
-        pass
+        self.pacman.key_release(key, modifiers)
 
 
 def main():
