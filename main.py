@@ -13,14 +13,14 @@ import arcade
 
 # some file imports
 from config import *
-import level1_board
-import pacman_board
+from board.levels import level1_board
+from board import pacman_board
 from pacman import Pacman
 
-from ghosts.blinky import Blinky
-from ghosts.pinky import Pinky
-from ghosts.inky import Inky
-from ghosts.clyde import Clyde
+from board.ghosts.blinky import Blinky
+from board.ghosts.pinky import Pinky
+from board.ghosts.inky import Inky
+from board.ghosts.clyde import Clyde
 
 
 TILE_SIZE = 15
@@ -136,6 +136,12 @@ class GameView(arcade.View):
 
         #ghost list
         self.ghost_list = arcade.SpriteList()
+        barrier_list = arcade.AStarBarrierList(
+            moving_sprite=self.pacman,
+            blocking_sprites=self.wall_list,
+            grid_size=GRID_SIZE
+        )
+        
         self.ghost_list.extend([Inky(), Blinky(), Pinky(), Clyde()])
 
         # engine for pacman
