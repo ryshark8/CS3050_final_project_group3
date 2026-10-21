@@ -1,7 +1,7 @@
 
 from config import *
 
-# Board Configuration
+# board Configuration
 tile_size = 15
 label_size = 14
 score_size = 12

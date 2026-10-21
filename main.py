@@ -13,14 +13,14 @@ import arcade
 
 # some file imports
 from config import *
-from Board.Levels import level1_board
-from Board import pacman_board
+from board.levels import level1_board
+from board import pacman_board
 from pacman import Pacman
 
-from Board.ghosts.blinky import Blinky
-from Board.ghosts.pinky import Pinky
-from Board.ghosts.inky import Inky
-from Board.ghosts.clyde import Clyde
+from board.ghosts.blinky import Blinky
+from board.ghosts.pinky import Pinky
+from board.ghosts.inky import Inky
+from board.ghosts.clyde import Clyde
 
 
 TILE_SIZE = 15

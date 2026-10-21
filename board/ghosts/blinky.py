@@ -1,6 +1,6 @@
 import arcade
 from pathlib import Path
-from Board.ghosts.ghost import Ghost
+from board.ghosts.ghost import Ghost
 import random
 
 class Blinky(Ghost):

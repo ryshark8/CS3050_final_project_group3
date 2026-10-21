@@ -2,7 +2,7 @@
 A file for keeping global constants
 """
 
-# Board constants
+# board constants
 WINDOW_WIDTH = 550
 WINDOW_HEIGHT = 700
 WINDOW_TITLE = "Pac-Man"
