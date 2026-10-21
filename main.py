@@ -204,9 +204,9 @@ class GameView(arcade.View):
         # This command should happen before we start drawing. It will clear
         # the screen to the background color, and erase what we drew last frame.
 
-        self.clear()
 
         # Call draw() on all your sprite lists below
+        self.clear()
 
         # Call draw() on all your sprite lists below
         level = self.levels[self.current_level]
@@ -217,20 +217,44 @@ class GameView(arcade.View):
         self.ghost_list.draw()
         self.sprites.draw()
 
+    # handle what happens when ghost and pacman collide
+    def handle_ghost_colision(self, ghost_list):
+        for ghost in ghost_list:
+            if ghost: # is frightened
+                # respawn the ghost
+                # add to the score
+                self.pacman.loose_life() # putting this here to test it
+            else:
+                pass
+
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
         Normally, you'll call update() on the sprite lists that
         need it.
         """
-        self.ghost_list.update()
+        # pacman versus the ghosts
+        hit_ghosts = arcade.check_for_collision_with_list(self.pacman, self.ghost_list)
+        if hit_ghosts:
+            self.handle_ghost_colision(hit_ghosts)
+
+        if self.pacman.is_dying:
+            self.pacman.update_death(delta_time)
+            if self.pacman.is_dead:  # death animation has finished
+                self.pacman.kill_pacman()
+                if self.pacman.lives <= 0:
+                    print("Game over")  # TODO: replace with a game over screen
+            return  # freeze ghosts while dying
+
+        self.ghost_list.update(delta_time=delta_time)
         self.sprites.update(delta_time)
-
-        # pacman engine update
         self.physics_engine.update()
-
         for engine in self.ghost_engines:
             engine.update()
+
+        hit_ghosts = arcade.check_for_collision_with_list(self.pacman, self.ghost_list)
+        if hit_ghosts:
+            self.handle_ghost_colision(hit_ghosts)
 
     def on_key_press(self, key, key_modifiers):
         """
@@ -239,6 +263,9 @@ class GameView(arcade.View):
         For a full list of keys, see:
         https://api.arcade.academy/en/latest/arcade.key.html
         """
+        # block inputs while pacman is dying
+        if self.pacman.is_dying:
+            return
         # move pacman
         self.pacman.on_key_press(key, key_modifiers)
 
