@@ -1,6 +1,6 @@
 import arcade
 from pathlib import Path
-from ghosts.ghost import Ghost
+from Board.ghosts.ghost import Ghost
 import random
 
 class Clyde(Ghost):
