@@ -33,7 +33,6 @@ HIGH_SCORE_POSITION = 12
 MARGIN = 20
 HEADER_HEIGHT = 55  # For score section
 
-
 class Level:
     def __init__(
         self,
