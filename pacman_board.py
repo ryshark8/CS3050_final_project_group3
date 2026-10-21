@@ -4,10 +4,7 @@
 
 import arcade
 
-import level1_board
-
-LINE_COLOR = (40, 50, 255)
-FILL_COLOR = (10, 10, 100)
+from config import *
 
 
 class Wall(arcade.SpriteSolidColor):
