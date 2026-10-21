@@ -4,10 +4,7 @@
 
 import arcade
 
-import level1_board
-
-LINE_COLOR = (40, 50, 255)
-FILL_COLOR = (10, 10, 100)
+from config import *
 
 
 class Wall(arcade.SpriteSolidColor):
@@ -54,7 +51,7 @@ class PacmanBoard:
         self.board_height = level.board_height
 
 
-        self.wall_list = arcade.SpriteList()
+        self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.ghost_wall_list = arcade.SpriteList()
 
         self.create_walls()

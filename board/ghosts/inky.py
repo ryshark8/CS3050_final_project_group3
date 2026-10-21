@@ -1,9 +1,9 @@
 import arcade
 from pathlib import Path
-from ghosts.ghost import Ghost
+from board.ghosts.ghost import Ghost
 import random
 
-class Clyde(Ghost):
+class Inky(Ghost):
 
     
     #TODO: create a dictionary of attributes based on color of the ghost
@@ -11,7 +11,7 @@ class Clyde(Ghost):
 
         super().__init__()
 
-        sprite_files = Path("images/ghosts/clyde")
+        sprite_files = Path("images/ghosts/inky")
 
         frames = [
             arcade.load_texture(str(frame))

@@ -1,6 +1,6 @@
 import arcade
 from pathlib import Path
-from ghosts.ghost import Ghost
+from board.ghosts.ghost import Ghost
 import random
 
 class Pinky(Ghost):
@@ -31,6 +31,8 @@ class Pinky(Ghost):
         self.center_y = random.randint(0, 720)
 
 
+    def update:
+        
 
     # def update_animation(self, direction):
 

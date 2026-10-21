@@ -1,4 +1,7 @@
-# Board Configuration
+
+from config import *
+
+# board Configuration
 tile_size = 15
 label_size = 14
 score_size = 12
@@ -7,8 +10,8 @@ high_score_position = 12
 score_position = 50
 
 # Window Configuration
-margin = 20
-header_height = 55 # For score section
+margin = MARGIN
+header_height = HEADER_HEIGHT
 
 raw_maze = [
     "##################################",

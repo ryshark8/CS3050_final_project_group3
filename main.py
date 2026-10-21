@@ -13,14 +13,14 @@ import arcade
 
 # some file imports
 from config import *
-import level1_board
-import pacman_board
+from board.levels import level1_board
+from board import pacman_board
 from pacman import Pacman
 
-from ghosts.blinky import Blinky
-from ghosts.pinky import Pinky
-from ghosts.inky import Inky
-from ghosts.clyde import Clyde
+from board.ghosts.blinky import Blinky
+from board.ghosts.pinky import Pinky
+from board.ghosts.inky import Inky
+from board.ghosts.clyde import Clyde
 
 
 TILE_SIZE = 15
@@ -87,8 +87,6 @@ class GameView(arcade.View):
 
         self.background_color = (5, 5, 12)
 
-        self.ghost_list = arcade.SpriteList()
-        self.ghost_list.extend([Inky(), Blinky(), Pinky(), Clyde()])
         
         # If you have sprite lists, you should create them here,
         # and set them to None
@@ -102,6 +100,7 @@ class GameView(arcade.View):
         self.ghost_wall_list = None
         self.current_score_label = None
         self.current_score = None
+        self.ghost_list = None
 
         # init pacman
         self.pacman = None
@@ -134,6 +133,16 @@ class GameView(arcade.View):
         self.pacman_walls = arcade.SpriteList()
         self.pacman_walls.extend(self.wall_list)
         self.pacman_walls.extend(self.ghost_wall_list)
+
+        #ghost list
+        self.ghost_list = arcade.SpriteList()
+        barrier_list = arcade.AStarBarrierList(
+            moving_sprite=self.pacman,
+            blocking_sprites=self.wall_list,
+            grid_size=GRID_SIZE
+        )
+        
+        self.ghost_list.extend([Inky(), Blinky(), Pinky(), Clyde()])
 
         # engine for pacman
         self.physics_engine = arcade.PhysicsEngineSimple(self.pacman, self.pacman_walls)
