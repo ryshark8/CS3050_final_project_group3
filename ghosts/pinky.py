@@ -31,6 +31,8 @@ class Pinky(Ghost):
         self.center_y = random.randint(0, 720)
 
 
+    def update:
+        
 
     # def update_animation(self, direction):
 
