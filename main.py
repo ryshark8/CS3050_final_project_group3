@@ -13,7 +13,6 @@ import arcade
 
 # some file imports
 from config import *
-from board.levels import level1_board
 from board import pacman_board
 from pacman import Pacman
 
@@ -21,56 +20,6 @@ from board.ghosts.blinky import Blinky
 from board.ghosts.pinky import Pinky
 from board.ghosts.inky import Inky
 from board.ghosts.clyde import Clyde
-
-
-TILE_SIZE = 15
-LABEL_SIZE = 14
-SCORE_SIZE = 12
-LABEL_POSITION = 32
-SCORE_POSITION = 50
-HIGH_SCORE_POSITION = 12
-
-# Window Configuration
-MARGIN = 20
-HEADER_HEIGHT = 55 # For score section
-
-
-class Level:
-    def __init__(self, tile_size, label_size, score_size, label_position, score_position,
-                 high_score_position, margin, header_height, rows, cols, maze,
-                 screen_width, screen_height, board_width, board_height):
-
-        self.wall_list = arcade.SpriteList()
-        self.ghost_wall_list = arcade.SpriteList()
-
-        self.tile_size = tile_size
-        self.label_size = label_size
-        self.score_size = score_size
-        self.label_position = label_position
-        self.score_position = score_position
-        self.high_score_position = high_score_position
-        self.margin = margin
-        self.header_height = header_height
-        self.rows = rows
-        self.cols = cols
-        self.maze = maze
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.board_width = board_width
-        self.board_height = board_height
-
-def setup_level1():
-    level1 = Level(TILE_SIZE, LABEL_SIZE, SCORE_SIZE, LABEL_POSITION, SCORE_POSITION,
-                   HIGH_SCORE_POSITION, MARGIN, HEADER_HEIGHT, level1_board.rows, level1_board.cols,
-                   level1_board.maze, level1_board.screen_width, level1_board.screen_height,
-                   level1_board.board_width, level1_board.board_height)
-
-    level1.board = pacman_board.PacmanBoard(level1)
-
-    level1.wall_list = level1.board.wall_list
-    level1.ghost_wall_list = level1.board.ghost_wall_list
-
-    return level1
 
 
 class GameView(arcade.View):

@@ -1,31 +1,13 @@
-#
-# Script for creating gameboard
-#
+"""
+Script for creating gameboard
+"""
 
 import arcade
 
 from config import *
-
-
-class Wall(arcade.SpriteSolidColor):
-
-    def __init__(self, x, y, tile_size):
-
-        super().__init__(
-            width=tile_size+4, height=tile_size+4,
-            color=LINE_COLOR,
-            center_x=x, center_y=y
-        )
-
-class GhostWall(arcade.SpriteSolidColor):
-
-    def __init__(self, x, y, tile_size):
-
-        super().__init__(
-            width=tile_size, height=tile_size/4,
-            color=LINE_COLOR,
-            center_x=x, center_y=y
-        )
+from levels.level import *
+from levels import level1_board
+from walls import *
 
 # Create window
 
@@ -94,6 +76,19 @@ class PacmanBoard:
             anchor_x = "center"
         )
 
+    def setup_level1(self):
+        level1 = Level(TILE_SIZE, LABEL_SIZE, SCORE_SIZE, LABEL_POSITION, SCORE_POSITION,
+                       HIGH_SCORE_POSITION, MARGIN, HEADER_HEIGHT, level1_board.rows, level1_board.cols,
+                       level1_board.maze, level1_board.screen_width, level1_board.screen_height,
+                       level1_board.board_width, level1_board.board_height)
+
+        level1.board = PacmanBoard(level1)
+
+        level1.wall_list = level1.board.wall_list
+        level1.ghost_wall_list = level1.board.ghost_wall_list
+
+        return level1
+
     # Convert grid coordinates to screen coordinates
     def cell_center(self, row, col):
         # Find horizontal center of tile
@@ -101,26 +96,6 @@ class PacmanBoard:
         # Find vertical center of tile
         y = self.margin + (self.rows - 1 - row) * self.tile_size + self.tile_size / 2
         return x, y
-
-    # Create Walls
-    def create_walls(self):
-        for row in range(self.rows):
-            for col in range(self.cols):
-                if self.maze[row][col] == "#":
-                    x, y = self.cell_center(row, col)
-
-                    wall = Wall(x,y, self.tile_size)
-
-                    self.wall_list.append(wall)
-
-                if self.maze[row][col] == "-":
-                    x, y = self.cell_center(row, col)
-
-                    wall = GhostWall(x,y, self.tile_size)
-
-                    self.ghost_wall_list.append(wall)
-
-
 
     # Draw maze
     def draw_maze(self):
