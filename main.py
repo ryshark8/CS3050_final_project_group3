@@ -36,8 +36,6 @@ class GameView(arcade.View):
 
         self.background_color = (5, 5, 12)
 
-        self.ghost_list = arcade.SpriteList()
-        self.ghost_list.extend([Inky(), Blinky(), Pinky(), Clyde()])
         
         # If you have sprite lists, you should create them here,
         # and set them to None
@@ -51,6 +49,7 @@ class GameView(arcade.View):
         self.ghost_wall_list = None
         self.current_score_label = None
         self.current_score = None
+        self.ghost_list = None
 
         # init pacman
         self.pacman = None
@@ -83,6 +82,16 @@ class GameView(arcade.View):
         self.pacman_walls = arcade.SpriteList()
         self.pacman_walls.extend(self.wall_list)
         self.pacman_walls.extend(self.ghost_wall_list)
+
+        #ghost list
+        self.ghost_list = arcade.SpriteList()
+        barrier_list = arcade.AStarBarrierList(
+            moving_sprite=self.pacman,
+            blocking_sprites=self.wall_list,
+            grid_size=GRID_SIZE
+        )
+        
+        self.ghost_list.extend([Inky(), Blinky(), Pinky(), Clyde()])
 
         # engine for pacman
         self.physics_engine = arcade.PhysicsEngineSimple(self.pacman, self.pacman_walls)

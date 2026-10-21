@@ -9,15 +9,17 @@ class Ghost(arcade.Sprite):
     FRAME_DURATION = 0.1
     
     #TODO: create a dictionary of attributes based on color of the ghost
-    def __init__(self):
+    def __init__(self, barrier_list):
         super().__init__(self)
+
+        self.barrier_list = barrier_list
 
         self.elapsed_time = 0
         self.scale = 1.5
         self.animation_timer = 0
         self.found = False
         self.speed = 3
-        self.destination = (random.randint(0, 1280), random.randint(0, 720))
+        self.destination = (random.randint(10, 540), random.randint(0, 700))
         self.dest_y = 400
 
 
@@ -73,3 +75,8 @@ class Ghost(arcade.Sprite):
 
         self.elapsed_time += delta_time
         self.animation_timer += delta_time
+
+
+    #TODO: create logic for scared ghost movement
+    def scared(self):
+        pass
