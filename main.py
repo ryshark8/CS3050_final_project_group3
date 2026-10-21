@@ -22,7 +22,6 @@ from board.ghosts.pinky import Pinky
 from board.ghosts.inky import Inky
 from board.ghosts.clyde import Clyde
 
-
 TILE_SIZE = 15
 LABEL_SIZE = 14
 SCORE_SIZE = 12
@@ -32,13 +31,28 @@ HIGH_SCORE_POSITION = 12
 
 # Window Configuration
 MARGIN = 20
-HEADER_HEIGHT = 55 # For score section
+HEADER_HEIGHT = 55  # For score section
 
 
 class Level:
-    def __init__(self, tile_size, label_size, score_size, label_position, score_position,
-                 high_score_position, margin, header_height, rows, cols, maze,
-                 screen_width, screen_height, board_width, board_height):
+    def __init__(
+        self,
+        tile_size,
+        label_size,
+        score_size,
+        label_position,
+        score_position,
+        high_score_position,
+        margin,
+        header_height,
+        rows,
+        cols,
+        maze,
+        screen_width,
+        screen_height,
+        board_width,
+        board_height,
+    ):
 
         self.wall_list = arcade.SpriteList()
         self.ghost_wall_list = arcade.SpriteList()
@@ -59,11 +73,25 @@ class Level:
         self.board_width = board_width
         self.board_height = board_height
 
+
 def setup_level1():
-    level1 = Level(TILE_SIZE, LABEL_SIZE, SCORE_SIZE, LABEL_POSITION, SCORE_POSITION,
-                   HIGH_SCORE_POSITION, MARGIN, HEADER_HEIGHT, level1_board.rows, level1_board.cols,
-                   level1_board.maze, level1_board.screen_width, level1_board.screen_height,
-                   level1_board.board_width, level1_board.board_height)
+    level1 = Level(
+        TILE_SIZE,
+        LABEL_SIZE,
+        SCORE_SIZE,
+        LABEL_POSITION,
+        SCORE_POSITION,
+        HIGH_SCORE_POSITION,
+        MARGIN,
+        HEADER_HEIGHT,
+        level1_board.rows,
+        level1_board.cols,
+        level1_board.maze,
+        level1_board.screen_width,
+        level1_board.screen_height,
+        level1_board.board_width,
+        level1_board.board_height,
+    )
 
     level1.board = pacman_board.PacmanBoard(level1)
 
@@ -87,7 +115,6 @@ class GameView(arcade.View):
 
         self.background_color = (5, 5, 12)
 
-        
         # If you have sprite lists, you should create them here,
         # and set them to None
 
@@ -134,15 +161,26 @@ class GameView(arcade.View):
         self.pacman_walls.extend(self.wall_list)
         self.pacman_walls.extend(self.ghost_wall_list)
 
-        #ghost list
+        # ghost list
         self.ghost_list = arcade.SpriteList()
         barrier_list = arcade.AStarBarrierList(
             moving_sprite=self.pacman,
             blocking_sprites=self.wall_list,
-            grid_size=GRID_SIZE
+            grid_size=BOARD_SIZE,
+            left=BOARD_BOUNDARIES[0][0],
+            right=BOARD_BOUNDARIES[0][1],
+            bottom=BOARD_BOUNDARIES[1][0],
+            top=BOARD_BOUNDARIES[1][1],
         )
-        
-        self.ghost_list.extend([Inky(), Blinky(), Pinky(), Clyde()])
+
+        self.ghost_list.extend(
+            [
+                Inky(barrier_list),
+                Blinky(barrier_list),
+                Pinky(barrier_list),
+                Clyde(barrier_list),
+            ]
+        )
 
         # engine for pacman
         self.physics_engine = arcade.PhysicsEngineSimple(self.pacman, self.pacman_walls)
@@ -165,11 +203,10 @@ class GameView(arcade.View):
 
         # This command should happen before we start drawing. It will clear
         # the screen to the background color, and erase what we drew last frame.
-        
+
         self.clear()
-        
+
         # Call draw() on all your sprite lists below
-        
 
         # Call draw() on all your sprite lists below
         level = self.levels[self.current_level]
@@ -231,7 +268,7 @@ class GameView(arcade.View):
 
 
 def main():
-    """ Main function """
+    """Main function"""
 
     # Create a window class. This is what actually shows up on screen
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)

@@ -7,9 +7,9 @@ class Inky(Ghost):
 
     
     #TODO: create a dictionary of attributes based on color of the ghost
-    def __init__(self):
+    def __init__(self, barrier_list):
 
-        super().__init__()
+        super().__init__(barrier_list)
 
         sprite_files = Path("images/ghosts/inky")
 
