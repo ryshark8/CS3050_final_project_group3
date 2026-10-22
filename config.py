@@ -15,7 +15,7 @@ BOARD_SIZE = BOARD_WIDTH * BOARD_HEIGHT
 #where the board is w/ respect to the window
 difference_w = WINDOW_WIDTH - BOARD_WIDTH
 difference_h = WINDOW_HEIGHT - BOARD_HEIGHT
-BOARD_BOUNDARIES = ([difference_w / 2], WINDOW_WIDTH - [difference_w / 2], [difference_h / 2], WINDOW_HEIGHT - [difference_h / 2] ) 
+BOARD_BOUNDARIES = ([difference_w / 2, WINDOW_WIDTH - (difference_w / 2)], [difference_h / 2, WINDOW_HEIGHT - (difference_h / 2)]) 
 
 
 MARGIN = 20

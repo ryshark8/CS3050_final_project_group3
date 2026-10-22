@@ -13,6 +13,7 @@ import arcade
 
 # some file imports
 from config import *
+from board.levels import level1_board
 from board import pacman_board
 from pacman import Pacman
 
@@ -20,6 +21,83 @@ from board.ghosts.blinky import Blinky
 from board.ghosts.pinky import Pinky
 from board.ghosts.inky import Inky
 from board.ghosts.clyde import Clyde
+
+TILE_SIZE = 15
+LABEL_SIZE = 14
+SCORE_SIZE = 12
+LABEL_POSITION = 32
+SCORE_POSITION = 50
+HIGH_SCORE_POSITION = 12
+
+# Window Configuration
+MARGIN = 20
+HEADER_HEIGHT = 55  # For score section
+
+class Level:
+    def __init__(
+        self,
+        tile_size,
+        label_size,
+        score_size,
+        label_position,
+        score_position,
+        high_score_position,
+        margin,
+        header_height,
+        rows,
+        cols,
+        maze,
+        screen_width,
+        screen_height,
+        board_width,
+        board_height,
+    ):
+
+        self.wall_list = arcade.SpriteList()
+        self.ghost_wall_list = arcade.SpriteList()
+
+        self.tile_size = tile_size
+        self.label_size = label_size
+        self.score_size = score_size
+        self.label_position = label_position
+        self.score_position = score_position
+        self.high_score_position = high_score_position
+        self.margin = margin
+        self.header_height = header_height
+        self.rows = rows
+        self.cols = cols
+        self.maze = maze
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.board_width = board_width
+        self.board_height = board_height
+
+
+def setup_level1():
+    level1 = Level(
+        TILE_SIZE,
+        LABEL_SIZE,
+        SCORE_SIZE,
+        LABEL_POSITION,
+        SCORE_POSITION,
+        HIGH_SCORE_POSITION,
+        MARGIN,
+        HEADER_HEIGHT,
+        level1_board.rows,
+        level1_board.cols,
+        level1_board.maze,
+        level1_board.screen_width,
+        level1_board.screen_height,
+        level1_board.board_width,
+        level1_board.board_height,
+    )
+
+    level1.board = pacman_board.PacmanBoard(level1)
+
+    level1.wall_list = level1.board.wall_list
+    level1.ghost_wall_list = level1.board.ghost_wall_list
+
+    return level1
 
 
 class GameView(arcade.View):
@@ -36,7 +114,6 @@ class GameView(arcade.View):
 
         self.background_color = (5, 5, 12)
 
-        
         # If you have sprite lists, you should create them here,
         # and set them to None
 
@@ -83,15 +160,26 @@ class GameView(arcade.View):
         self.pacman_walls.extend(self.wall_list)
         self.pacman_walls.extend(self.ghost_wall_list)
 
-        #ghost list
+        # ghost list
         self.ghost_list = arcade.SpriteList()
         barrier_list = arcade.AStarBarrierList(
             moving_sprite=self.pacman,
             blocking_sprites=self.wall_list,
-            grid_size=GRID_SIZE
+            grid_size=BOARD_SIZE,
+            left=BOARD_BOUNDARIES[0][0],
+            right=BOARD_BOUNDARIES[0][1],
+            bottom=BOARD_BOUNDARIES[1][0],
+            top=BOARD_BOUNDARIES[1][1],
         )
-        
-        self.ghost_list.extend([Inky(), Blinky(), Pinky(), Clyde()])
+
+        self.ghost_list.extend(
+            [
+                Inky(barrier_list),
+                Blinky(barrier_list),
+                Pinky(barrier_list),
+                Clyde(barrier_list),
+            ]
+        )
 
         # engine for pacman
         self.physics_engine = arcade.PhysicsEngineSimple(self.pacman, self.pacman_walls)
@@ -114,11 +202,10 @@ class GameView(arcade.View):
 
         # This command should happen before we start drawing. It will clear
         # the screen to the background color, and erase what we drew last frame.
-        
-        self.clear()
-        
+
+
         # Call draw() on all your sprite lists below
-        
+        self.clear()
 
         # Call draw() on all your sprite lists below
         level = self.levels[self.current_level]
@@ -129,20 +216,44 @@ class GameView(arcade.View):
         self.ghost_list.draw()
         self.sprites.draw()
 
+    # handle what happens when ghost and pacman collide
+    def handle_ghost_colision(self, ghost_list):
+        for ghost in ghost_list:
+            if ghost: # is frightened
+                # respawn the ghost
+                # add to the score
+                self.pacman.loose_life() # putting this here to test it
+            else:
+                pass
+
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
         Normally, you'll call update() on the sprite lists that
         need it.
         """
-        self.ghost_list.update()
+        # pacman versus the ghosts
+        hit_ghosts = arcade.check_for_collision_with_list(self.pacman, self.ghost_list)
+        if hit_ghosts:
+            self.handle_ghost_colision(hit_ghosts)
+
+        if self.pacman.is_dying:
+            self.pacman.update_death(delta_time)
+            if self.pacman.is_dead:  # death animation has finished
+                self.pacman.kill_pacman()
+                if self.pacman.lives <= 0:
+                    print("Game over")  # TODO: replace with a game over screen
+            return  # freeze ghosts while dying
+
+        self.ghost_list.update(delta_time=delta_time)
         self.sprites.update(delta_time)
-
-        # pacman engine update
         self.physics_engine.update()
-
         for engine in self.ghost_engines:
             engine.update()
+
+        hit_ghosts = arcade.check_for_collision_with_list(self.pacman, self.ghost_list)
+        if hit_ghosts:
+            self.handle_ghost_colision(hit_ghosts)
 
     def on_key_press(self, key, key_modifiers):
         """
@@ -151,6 +262,9 @@ class GameView(arcade.View):
         For a full list of keys, see:
         https://api.arcade.academy/en/latest/arcade.key.html
         """
+        # block inputs while pacman is dying
+        if self.pacman.is_dying:
+            return
         # move pacman
         self.pacman.on_key_press(key, key_modifiers)
 
@@ -180,7 +294,7 @@ class GameView(arcade.View):
 
 
 def main():
-    """ Main function """
+    """Main function"""
 
     # Create a window class. This is what actually shows up on screen
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
