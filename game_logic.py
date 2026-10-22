@@ -13,7 +13,6 @@ import arcade
 
 # some file imports
 from config import *
-from board.levels import level1_board
 from board import pacman_board
 from pacman import Pacman
 
@@ -21,84 +20,6 @@ from board.ghosts.blinky import Blinky
 from board.ghosts.pinky import Pinky
 from board.ghosts.inky import Inky
 from board.ghosts.clyde import Clyde
-
-TILE_SIZE = 15
-LABEL_SIZE = 14
-SCORE_SIZE = 12
-LABEL_POSITION = 32
-SCORE_POSITION = 50
-HIGH_SCORE_POSITION = 12
-
-# Window Configuration
-MARGIN = 20
-HEADER_HEIGHT = 55  # For score section
-
-class Level:
-    def __init__(
-        self,
-        tile_size,
-        label_size,
-        score_size,
-        label_position,
-        score_position,
-        high_score_position,
-        margin,
-        header_height,
-        rows,
-        cols,
-        maze,
-        screen_width,
-        screen_height,
-        board_width,
-        board_height,
-    ):
-
-        self.wall_list = arcade.SpriteList()
-        self.ghost_wall_list = arcade.SpriteList()
-
-        self.tile_size = tile_size
-        self.label_size = label_size
-        self.score_size = score_size
-        self.label_position = label_position
-        self.score_position = score_position
-        self.high_score_position = high_score_position
-        self.margin = margin
-        self.header_height = header_height
-        self.rows = rows
-        self.cols = cols
-        self.maze = maze
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.board_width = board_width
-        self.board_height = board_height
-
-
-def setup_level1():
-    level1 = Level(
-        TILE_SIZE,
-        LABEL_SIZE,
-        SCORE_SIZE,
-        LABEL_POSITION,
-        SCORE_POSITION,
-        HIGH_SCORE_POSITION,
-        MARGIN,
-        HEADER_HEIGHT,
-        level1_board.rows,
-        level1_board.cols,
-        level1_board.maze,
-        level1_board.screen_width,
-        level1_board.screen_height,
-        level1_board.board_width,
-        level1_board.board_height,
-    )
-
-    level1.board = pacman_board.PacmanBoard(level1)
-
-    level1.wall_list = level1.board.wall_list
-    level1.ghost_wall_list = level1.board.ghost_wall_list
-
-    return level1
-
 
 class GameView(arcade.View):
     """
@@ -109,8 +30,10 @@ class GameView(arcade.View):
     with your own code. Don't leave 'pass' in this program.
     """
 
-    def __init__(self):
+    def __init__(self, level):
         super().__init__()
+
+        self.level = level
 
         self.background_color = (5, 5, 12)
 
@@ -119,30 +42,31 @@ class GameView(arcade.View):
 
         # set class lists to none
         self.sprites = None
-        self.levels = None
-
-        self.current_level = None
-        self.wall_list = None
-        self.ghost_wall_list = None
-        self.current_score_label = None
-        self.current_score = None
+        self.board = None
+        self.pacman = None
         self.ghost_list = None
 
-        # init pacman
-        self.pacman = None
+        self.physics_engine = None
+        self.ghost_engines = None
+        self.pacman_walls = None
+        self.barrier_list = None
+
+        self.current_score_label = None
+        self.current_score = None
+
+        self.levels = [self.level]
+        self.current_level = 0
 
         self.reset()
 
     def setup(self):
-        self.levels = []
 
-        level = setup_level1()
-        self.levels.append(level)
+        level = self.levels[self.current_level]
 
-        self.current_level = 0
+        self.board = pacman_board.PacmanBoard(level)
 
-        self.wall_list = level.wall_list
-        self.ghost_wall_list = level.ghost_wall_list
+        self.wall_list = self.board.wall_list
+        self.ghost_wall_list = self.board.ghost_wall_list
 
         # sprites
         # pacman
@@ -160,8 +84,6 @@ class GameView(arcade.View):
         self.pacman_walls.extend(self.wall_list)
         self.pacman_walls.extend(self.ghost_wall_list)
 
-        # ghost list
-        self.ghost_list = arcade.SpriteList()
         barrier_list = arcade.AStarBarrierList(
             moving_sprite=self.pacman,
             blocking_sprites=self.wall_list,
@@ -172,6 +94,7 @@ class GameView(arcade.View):
             top=BOARD_BOUNDARIES[1][1],
         )
 
+        self.ghost_list = arcade.SpriteList()
         self.ghost_list.extend(
             [
                 Inky(barrier_list),
@@ -209,8 +132,8 @@ class GameView(arcade.View):
 
         # Call draw() on all your sprite lists below
         level = self.levels[self.current_level]
-        level.board.draw_maze()
-        level.board.draw_header()
+        self.board.draw_maze()
+        self.board.draw_header()
 
         # draw the sprites
         self.ghost_list.draw()

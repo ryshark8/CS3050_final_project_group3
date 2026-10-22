@@ -1,15 +1,22 @@
-from config import * 
 import arcade
+
+from board.levels import level1_board
+from config import *
+from board.levels.level1_board import *
+from board.levels.level import *
 from game_logic import GameView
 
 def main():
     """Main function"""
 
+    # Create First Level and Window dimensions
+    level = Level(level1_board.maze)
+
     # Create a window class. This is what actually shows up on screen
-    window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+    window = arcade.Window(level.screen_width, level.screen_height, WINDOW_TITLE)
 
     # Create and set up the GameView
-    game = GameView()
+    game = GameView(level)
 
     game.setup()
 

@@ -7,21 +7,22 @@ import arcade
 from config import *
 from board.walls import build_walls
 
+tile_size = TILE_SIZE
+label_size = LABEL_SIZE
+score_size = SCORE_SIZE
+label_position = LABEL_POSITION
+score_position = SCORE_POSITION
+high_score_position = HIGH_SCORE_POSITION
+margin = MARGIN
+header_height = HEADER_HEIGHT
+
 class PacmanBoard:
     def __init__(self, level):
 
         self.level = level
 
         maze = self.level.maze
-        tile_size = self.level.tile_size
         cell_center = self.level.cell_center
-        label_size = self.level.label_size
-        score_size = self.level.score_size
-        label_position = self.level.label_position
-        score_position = self.level.score_position
-        high_score_position = self.level.high_score_position
-        margin = self.level.margin
-        header_height = self.level.header_height
         rows = self.level.rows
         cols = self.level.cols
 
@@ -82,7 +83,7 @@ class PacmanBoard:
             arcade.draw_rect_filled(
                 arcade.XYWH(
                     wall.center_x, wall.center_y,
-                    self.level.tile_size, self.level.tile_size
+                    tile_size, tile_size
                 ),
                 color=FILL_COLOR
             )
