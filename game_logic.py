@@ -15,6 +15,7 @@ import arcade
 from config import *
 from board import pacman_board
 from pacman import Pacman
+from board.dots_and_fruits.fruits import Fruit, fruit_for_level
 
 from board.ghosts.blinky import Blinky
 from board.ghosts.pinky import Pinky
@@ -45,6 +46,7 @@ class GameView(arcade.View):
         self.board = None
         self.pacman = None
         self.ghost_list = None
+        self.fruit_list = None
 
         self.physics_engine = None
         self.ghost_engines = None
@@ -52,7 +54,7 @@ class GameView(arcade.View):
         self.barrier_list = None
 
         self.current_score_label = None
-        self.current_score = None
+        self.current_score = 0
 
         self.levels = [self.level]
         self.current_level = 0
@@ -68,9 +70,11 @@ class GameView(arcade.View):
         self.wall_list = self.board.wall_list
         self.ghost_wall_list = self.board.ghost_wall_list
 
-        # sprites
+        # ---------- sprites --------------
         # pacman
         self.sprites = arcade.SpriteList()
+        # Fruits
+        self.fruit_list = arcade.SpriteList()
 
         # coords for where to spawn pacman, right below the ghost prison or whatever
         spawn_x = 275
@@ -138,6 +142,7 @@ class GameView(arcade.View):
         # draw the sprites
         self.ghost_list.draw()
         self.sprites.draw()
+        self.fruit_list.draw()
 
     # handle what happens when ghost and pacman collide
     def handle_ghost_colision(self, ghost_list):
@@ -148,6 +153,11 @@ class GameView(arcade.View):
                 self.pacman.loose_life() # putting this here to test it
             else:
                 pass
+
+    def spawn_fruit(self):
+        if len(self.fruit_list) == 0:  # only one at a time
+            kind = fruit_for_level(self.current_level)
+            self.fruit_list.append(Fruit(kind, 275, 290))
 
     def on_update(self, delta_time):
         """
@@ -178,6 +188,11 @@ class GameView(arcade.View):
         if hit_ghosts:
             self.handle_ghost_colision(hit_ghosts)
 
+        self.fruit_list.update(delta_time=delta_time)
+        for fruit in arcade.check_for_collision_with_list(self.pacman, self.fruit_list):
+            self.current_score += fruit.points
+            fruit.remove_from_sprite_lists()
+
     def on_key_press(self, key, key_modifiers):
         """
         Called whenever a key on the keyboard is pressed.
@@ -190,6 +205,11 @@ class GameView(arcade.View):
             return
         # move pacman
         self.pacman.on_key_press(key, key_modifiers)
+
+        # TODO: change call fruit to happen when you eat enough dots
+        # happens when you press f now, for testing
+        if key == arcade.key.F:
+            self.spawn_fruit()
 
     def on_key_release(self, key, key_modifiers):
         """
