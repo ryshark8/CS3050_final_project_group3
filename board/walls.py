@@ -12,18 +12,6 @@ class Wall(arcade.SpriteSolidColor):
             center_x=x, center_y=y
         )
 
-        # Create Walls
-        def create_walls(self):
-            for row in range(self.rows):
-                for col in range(self.cols):
-                    if self.maze[row][col] == "#":
-                        x, y = self.cell_center(row, col)
-
-                        wall = Wall(x, y, self.tile_size)
-
-                        self.wall_list.append(wall)
-
-
 class GhostWall(arcade.SpriteSolidColor):
 
     def __init__(self, x, y, tile_size):
@@ -34,13 +22,22 @@ class GhostWall(arcade.SpriteSolidColor):
             center_x=x, center_y=y
         )
 
-        # Create Walls
-        def create_walls(self):
-            for row in range(self.rows):
-                for col in range(self.cols):
-                    if self.maze[row][col] == "-":
-                        x, y = self.cell_center(row, col)
+def build_walls(maze, tile_size, cell_center):
 
-                        wall = GhostWall(x, y, self.tile_size)
+    wall_list = arcade.SpriteList(use_spatial_hash=True)
+    ghost_wall_list = arcade.SpriteList()
 
-                        self.ghost_wall_list.append(wall)
+    for row in range (len(maze)):
+        for col in range (len(maze[row])):
+            tile = maze[row][col]
+            x,y = cell_center(row, col)
+
+            if tile == "#":
+                wall = Wall(x, y, tile_size)
+                wall_list.append(wall)
+
+            elif tile == "-":
+                ghost_wall = GhostWall(x,y,tile_size)
+                ghost_wall_list.append(ghost_wall)
+
+    return wall_list, ghost_wall_list

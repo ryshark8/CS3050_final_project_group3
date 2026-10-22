@@ -1,24 +1,35 @@
+"""
+File for Level Class
+Calculates board dimensions for a specific level and
+has cell center function
+"""
 
-import arcade
+from config import *
+
+tile_size = TILE_SIZE
+label_size = LABEL_SIZE
+score_size = SCORE_SIZE
+label_position = LABEL_POSITION
+score_position = SCORE_POSITION
+high_score_position = HIGH_SCORE_POSITION
+margin = MARGIN
+header_height = HEADER_HEIGHT
 
 class Level:
-    def __init__(self, tile_size, label_size, score_size, label_position, score_position,
-                 high_score_position, margin, header_height, rows, cols, maze,
-                 screen_width, screen_height, board_width, board_height):
-
-        self.tile_size = tile_size
-        self.label_size = label_size
-        self.score_size = score_size
-        self.label_position = label_position
-        self.score_position = score_position
-        self.high_score_position = high_score_position
-        self.margin = margin
-        self.header_height = header_height
-        self.rows = rows
-        self.cols = cols
+    def __init__(self, maze):
         self.maze = maze
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.board_width = board_width
-        self.board_height = board_height
+        self.rows = len(self.maze)
+        self.cols = max(len(row) for row in self.maze)
+        self.maze = [row.ljust(self.cols)[:self.cols] for row in self.maze]
+        self.board_width = self.cols * tile_size
+        self.board_height = self.rows * tile_size
+        self.screen_width = self.board_width + 2 * margin
+        self.screen_height = self.board_height + header_height + 2 * margin
 
+    # Convert grid coordinates to screen coordinates
+    def cell_center(self, row, col):
+        # Find horizontal center of tile
+        x = margin + col * tile_size + tile_size / 2
+        # Find vertical center of tile
+        y = margin + (self.rows - 1 - row) * tile_size + tile_size / 2
+        return x, y
