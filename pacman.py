@@ -20,7 +20,7 @@ class Pacman(arcade.Sprite):
         self.open_texture = arcade.load_texture(IMAGE_DIR / "right_frame1.png")
         self.closed_texture = arcade.load_texture(IMAGE_DIR / "right_frame2.png")
 
-        # death, there is certainly a better way to do this
+        # death: there is certainly a better way to do this
         self.death_textures = [
             arcade.load_texture(IMAGE_DIR / "death_frame0.png"),
             arcade.load_texture(IMAGE_DIR / "death_frame1.png"),
