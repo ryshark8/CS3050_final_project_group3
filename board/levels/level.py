@@ -25,6 +25,8 @@ class Level:
         self.board_height = self.rows * tile_size
         self.screen_width = self.board_width + 2 * margin
         self.screen_height = self.board_height + header_height + 2 * margin
+        print("Rows:", len(maze))
+        print("Columns:", len(maze[0]))
 
     # Convert grid coordinates to screen coordinates
     def cell_center(self, row, col):
