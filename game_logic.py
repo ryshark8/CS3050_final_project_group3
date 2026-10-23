@@ -132,8 +132,7 @@ class GameView(arcade.View):
 
         # Call draw() on all your sprite lists below
         level = self.levels[self.current_level]
-        self.board.draw_maze()
-        self.board.draw_header()
+        self.board.draw()
 
         # draw the sprites
         self.ghost_list.draw()

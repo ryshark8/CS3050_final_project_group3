@@ -6,6 +6,7 @@ import arcade
 
 from config import *
 from board.walls import build_walls
+from board.dots_and_fruits.dots import Dot
 
 tile_size = TILE_SIZE
 label_size = LABEL_SIZE
@@ -30,6 +31,9 @@ class PacmanBoard:
         screen_height = self.level.screen_height
         board_width = self.level.board_width
         board_height = self.level.board_height
+
+        self.dots = Dot()
+        self.dot_list = self.dots.create_dots(level)
 
         self.wall_list, self.ghost_wall_list = build_walls(
             maze, tile_size, cell_center)
@@ -95,6 +99,10 @@ class PacmanBoard:
         self.current_score_label.draw()
         self.current_score_number.draw()
 
+    def draw_dots(self):
+        self.dot_list.draw()
+
     def draw(self):
         self.draw_maze()
         self.draw_header()
+        self.draw_dots()
