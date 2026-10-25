@@ -13,23 +13,49 @@ FRUIT_LIFETIME = 10
 # How many points each of the fruits is worth
 # I only have cherry and dk what the other fruits are (sorry)
 FRUIT_POINTS = {
-    "cherries": 100
+    "cherry": 100,
+    "strawberry": 300,
+    "orange": 500,
+    "apple": 700,
+    "melon": 1000,
+    "galaxian": 2000,
+    "bell": 3000,
+    "key": 5000
+}
+
+# the sizes of each of the images, provided default does not look good
+DEFAULT_FRUIT_SIZE = 20
+FRUIT_SIZE = {
+    "galaxian": 25,
+    "bell": 18,
+    "key": 15
 }
 
 # which fruit appears on what level, in order
 LEVEL_FRUIT = [
-    "cherries"
+     "cherry",
+    "strawberry",
+    "orange",
+    "apple",
+    "melon",
+    "galaxian",
+    "bell",
+    "key",
 ]
 
 def fruit_for_level(level):
     return LEVEL_FRUIT[min(level, len(LEVEL_FRUIT) - 1)]
 
 class Fruit(arcade.Sprite):
-    def __init__(self, kind, x, y, size=20):
+    def __init__(self, kind, x, y, size=None):
         texture = arcade.load_texture(IMAGE_DIR / f"{kind}.png")
         super().__init__(texture, center_x=x, center_y=y)
         self.kind = kind
         self.points = FRUIT_POINTS[kind]
+
+        # scale the fruits / objects
+        if size is None:
+            size = FRUIT_SIZE.get(kind, DEFAULT_FRUIT_SIZE)
 
         # fit it to one tile
         self.scale = size / texture.width

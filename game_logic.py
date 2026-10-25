@@ -15,7 +15,7 @@ import arcade
 from config import *
 from board import pacman_board
 from pacman import Pacman
-from board.dots_and_fruits.fruits import Fruit, fruit_for_level
+from board.dots_and_fruits.fruits import Fruit, fruit_for_level, LEVEL_FRUIT
 
 from board.ghosts.blinky import Blinky
 from board.ghosts.pinky import Pinky
@@ -59,6 +59,9 @@ class GameView(arcade.View):
         self.levels = [self.level]
         self.current_level = 0
 
+        # to test what all of the fruits look like on the board
+        # get rid of when done
+        self.test_fruit_index = 0
         self.reset()
 
     def setup(self):
@@ -116,6 +119,18 @@ class GameView(arcade.View):
             arcade.PhysicsEngineSimple(ghost, self.wall_list)
             for ghost in self.ghost_list
         ]
+
+    # also a method to test what all of the fruits look like at each of their levels
+    # get rid of it when done
+    def spawn_test_fruit(self):
+        self.fruit_list.clear()
+
+        kind = LEVEL_FRUIT[self.test_fruit_index]
+        self.fruit_list.append(Fruit(kind, 275, 290))
+        print(f"Spawned: {kind}")
+
+        # move to the next fruit, wrapping back to the start
+        self.test_fruit_index = (self.test_fruit_index + 1) % len(LEVEL_FRUIT)
 
     def reset(self):
         """Reset the game to the initial state."""
@@ -209,7 +224,7 @@ class GameView(arcade.View):
         # TODO: change call fruit to happen when you eat enough dots
         # happens when you press f now, for testing
         if key == arcade.key.F:
-            self.spawn_fruit()
+            self.spawn_test_fruit()
 
     def on_key_release(self, key, key_modifiers):
         """
