@@ -76,8 +76,8 @@ class GameView(arcade.View):
         self.sprites = arcade.SpriteList()
 
         # coords for where to spawn pacman, right below the ghost prison or whatever
-        spawn_x = 275
-        spawn_y = 263
+        spawn_x = 250
+        spawn_y = 260
 
         self.pacman = Pacman(spawn_x, spawn_y)
         self.sprites.append(self.pacman)
