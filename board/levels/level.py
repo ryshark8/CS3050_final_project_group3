@@ -35,3 +35,15 @@ class Level:
         # Find vertical center of tile
         y = margin + (self.rows - 1 - row) * tile_size + tile_size / 2
         return x, y
+
+    def find_jail_center(self):
+        jail_center = None
+
+        for row in range(len(self.maze)):
+            for col in range(len(self.maze[row])):
+                tile = self.maze[row][col]
+
+                if tile == "*":
+                    jail_center = (row, col)
+
+        return jail_center
