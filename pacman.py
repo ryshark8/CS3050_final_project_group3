@@ -8,7 +8,7 @@ from pathlib import Path
 
 # some constants
 MOVEMENT_SPEED = 2
-RADIUS = 10
+RADIUS = 9
 DEATH_FRAME_DURATION = 0.12
 MOUTH_INTERVAL = 0.1
 IMAGE_DIR = Path(__file__).parent / "images/pacman"
@@ -48,8 +48,8 @@ class Pacman(arcade.Sprite):
         self.is_dead = False
 
         # coords for where to spawn pacman, right below the ghost prison or whatever
-        self.spawn_x = 275
-        self.spawn_y = 290
+        self.spawn_x = 250
+        self.spawn_y = 260
 
         # death attributes
         self.death_frame = 0

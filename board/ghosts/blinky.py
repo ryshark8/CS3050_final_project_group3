@@ -2,6 +2,7 @@ import arcade
 from pathlib import Path
 from board.ghosts.ghost import Ghost
 import random
+from config import *
 
 class Blinky(Ghost):
 
@@ -27,6 +28,6 @@ class Blinky(Ghost):
 
         self.textures = self.frames["down"]
         self.texture = self.textures[0]
-        self.center_x = random.randint(0, 1280)
-        self.center_y = random.randint(0, 720)
-
+        self.center_x = JAIL_CENTER[0] + self.width + 10
+        self.center_y = JAIL_CENTER[1]
+        

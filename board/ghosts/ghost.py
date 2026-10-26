@@ -1,12 +1,13 @@
 import arcade
 import random
+from config import *
 
 class Ghost(arcade.Sprite):
     """
     when intialized, should only need ghost color, the rest should be handled internally
     """
 
-    FRAME_DURATION = 0.1
+    FRAME_DURATION = 0.2
     
     #TODO: create a dictionary of attributes based on color of the ghost
     def __init__(self, barrier_list):
@@ -18,9 +19,16 @@ class Ghost(arcade.Sprite):
         self.scale = 1.5
         self.animation_timer = 0
         self.found = False
-        self.speed = 3
-        self.destination = (random.randint(10, 540), random.randint(0, 700))
-        self.dest_y = 400
+        self.speed = 1 
+
+        # for jail functionality
+        self.jail_time = None
+        self.jail = True
+
+        self.destination = None
+        self.path = None
+        self.path_pos = 0
+        
 
 
     def update_animation(self, direction):
@@ -40,32 +48,24 @@ class Ghost(arcade.Sprite):
         self.cur_texture_index = (self.cur_texture_index + 1) % len(self.textures)
         self.texture = self.textures[self.cur_texture_index]
 
-    def update(self, delta_time):
+    def update(self, delta_time, pacman_pos):
         # movement logic
+        
 
+        # jailed ghosts only move up and down
+        if self.jail:
+            # if self.elapsed_time >= self.jail_time:
+            #     self.jail = False
+
+            direction = self.jail_movement(self)
+            self.update_animation(direction=direction)
+            self.elapsed_time += delta_time
+            return
+
+        
         #get new end point
-        if self.center_x == self.destination[0] and self.center_y == self.destination[1]:
-            self.destination = (random.randint(0, 1280), random.randint(0, 720))
-
-        start_x = self.center_x
-        start_y = self.center_y
-
-        x_diff = self.destination[0] - start_x
-        y_diff = self.destination[1] - start_y
-
-        #can only move orthogonally
-        if x_diff:
-            
-            speed = min(self.speed, abs(x_diff))
-            sign = (x_diff > 0) - (x_diff < 0)
-            self.center_x += speed * sign
-            direction = ('x', x_diff)
-
-        elif y_diff:
-            speed = min(self.speed, abs(y_diff))
-            sign = (y_diff > 0) - (y_diff < 0)
-            self.center_y += speed * sign
-            direction = ('y', y_diff)
+        #direction = self.chase(pacman_pos)
+        direction = ("x", 0)
         
         #update the animation
         if self.animation_timer >= self.FRAME_DURATION:
@@ -79,4 +79,25 @@ class Ghost(arcade.Sprite):
 
     #TODO: create logic for scared ghost movement
     def scared(self):
+        pass
+
+    @staticmethod
+    def jail_movement(self):
+
+        if self.center_y == self.destination[1]:
+            #go down
+            if self.center_y > JAIL_CENTER[1]:
+                self.destination[1] = JAIL_CENTER[1] - 6
+
+            else:
+                self.destination[1] = JAIL_CENTER[1] + 6
+
+        distance = self.destination[1] - self.center_y
+        speed = min(self.speed, abs(distance))
+        sign = (distance > 0) - (distance < 0)
+        self.center_y += speed * sign
+        
+        return ('y', distance)
+
+    def chase(self, pacman_pos):
         pass

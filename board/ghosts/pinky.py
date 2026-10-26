@@ -1,10 +1,11 @@
 import arcade
 from pathlib import Path
 from board.ghosts.ghost import Ghost
-import random
+from config import *
 
 class Pinky(Ghost):
 
+    JAIL_TIME = 10
     
     #TODO: create a dictionary of attributes based on color of the ghost
     def __init__(self, barrier_list):
@@ -27,8 +28,11 @@ class Pinky(Ghost):
 
         self.textures = self.frames["down"]
         self.texture = self.textures[0]
-        self.center_x = random.randint(0, 1280)
-        self.center_y = random.randint(0, 720)
+        self.center_x = JAIL_CENTER[0]
+        self.center_y = JAIL_CENTER[1]
+        self.jail_time = self.JAIL_TIME
+
+        self.destination = [self.center_x, JAIL_CENTER[1] + 6]
 
 
     # def update():

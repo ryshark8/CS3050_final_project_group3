@@ -80,8 +80,8 @@ class GameView(arcade.View):
         self.fruit_list = arcade.SpriteList()
 
         # coords for where to spawn pacman, right below the ghost prison or whatever
-        spawn_x = 275
-        spawn_y = 290
+        spawn_x = 250
+        spawn_y = 260
 
         self.pacman = Pacman(spawn_x, spawn_y)
         self.sprites.append(self.pacman)
@@ -94,18 +94,18 @@ class GameView(arcade.View):
         barrier_list = arcade.AStarBarrierList(
             moving_sprite=self.pacman,
             blocking_sprites=self.wall_list,
-            grid_size=BOARD_SIZE,
-            left=BOARD_BOUNDARIES[0][0],
-            right=BOARD_BOUNDARIES[0][1],
-            bottom=BOARD_BOUNDARIES[1][0],
-            top=BOARD_BOUNDARIES[1][1],
+            grid_size=TILE_SIZE,
+            left=MARGIN,
+            right=MARGIN + BOARD_WIDTH,
+            bottom=MARGIN,
+            top=MARGIN + BOARD_HEIGHT,
         )
 
         self.ghost_list = arcade.SpriteList()
         self.ghost_list.extend(
             [
                 Inky(barrier_list),
-                Blinky(barrier_list),
+                #Blinky(barrier_list),
                 Pinky(barrier_list),
                 Clyde(barrier_list),
             ]
@@ -192,7 +192,7 @@ class GameView(arcade.View):
                     print("Game over")  # TODO: replace with a game over screen
             return  # freeze ghosts while dying
 
-        self.ghost_list.update(delta_time=delta_time)
+        self.ghost_list.update(delta_time=delta_time, pacman_pos=self.pacman.position)
         self.sprites.update(delta_time)
         self.physics_engine.update()
         for engine in self.ghost_engines:
