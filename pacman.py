@@ -55,7 +55,7 @@ class Pacman(arcade.Sprite):
         self.death_frame = 0
         self.death_timer = 0.0
 
-        # scale the image so he is RADIUS * 2 pixels wide, whatever the file size
+        # scale the image so he is RADIUS * 2 pixels wide
         self.scale = (RADIUS * 2) / self.open_texture.width
 
         self.mouth_timer = 0.0

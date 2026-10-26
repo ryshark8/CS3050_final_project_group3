@@ -126,7 +126,7 @@ class GameView(arcade.View):
         self.fruit_list.clear()
 
         kind = LEVEL_FRUIT[self.test_fruit_index]
-        self.fruit_list.append(Fruit(kind, 275, 290))
+        self.fruit_list.append(Fruit(kind, 265, 247))
         print(f"Spawned: {kind}")
 
         # move to the next fruit, wrapping back to the start
@@ -171,7 +171,7 @@ class GameView(arcade.View):
     def spawn_fruit(self):
         if len(self.fruit_list) == 0:  # only one at a time
             kind = fruit_for_level(self.current_level)
-            self.fruit_list.append(Fruit(kind, 275, 290))
+            self.fruit_list.append(Fruit(kind, 250, 260))
 
     def on_update(self, delta_time):
         """
