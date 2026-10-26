@@ -19,7 +19,7 @@ class Ghost(arcade.Sprite):
         self.scale = 1.5
         self.animation_timer = 0
         self.found = False
-        self.speed = 1
+        self.speed = 1 
 
         # for jail functionality
         self.jail_time = None
