@@ -13,6 +13,16 @@ DEATH_FRAME_DURATION = 0.12
 MOUTH_INTERVAL = 0.1
 IMAGE_DIR = Path(__file__).parent / "images/pacman"
 
+# some more constants, these ones set the keys
+KEY_TO_DIR = {
+    arcade.key.UP: (0, 1, 270),
+    arcade.key.DOWN: (0, -1, 90),
+    arcade.key.LEFT: (-1, 0, 180),
+    arcade.key.RIGHT: (1, 0, 0),
+}
+
+# how many px off from a corridor that he will still take
+CORNER_SLACK = 6
 
 class Pacman(arcade.Sprite):
     def __init__(self, x, y):
@@ -55,6 +65,12 @@ class Pacman(arcade.Sprite):
         self.death_frame = 0
         self.death_timer = 0.0
 
+        # movement variables
+        self.walls = None
+        self.direction = (0, 0, 0)
+        self.next_direction = (0, 0, 0)
+        self._last_pos = (x, y)
+
         # scale the image so he is RADIUS * 2 pixels wide, whatever the file size
         self.scale = (RADIUS * 2) / self.open_texture.width
 
@@ -86,6 +102,10 @@ class Pacman(arcade.Sprite):
         self.texture = self.open_texture
         self.mouth_timer = 0.0
 
+        # reset the movement vars
+        self.direction = (0, 0, 0)
+        self.next_direction = (0, 0, 0)
+
     def loose_life(self):
         if self.is_dying: return # death has been kicked off can't kill him again
         self.is_dying = True
@@ -102,37 +122,69 @@ class Pacman(arcade.Sprite):
         if self.lives > 0:
             self.respawn()
 
+    # this is the one that makes him move prettier
+    # like he ends up in the lane instead of smashing his head into the corner
+    def _try_turn(self, direction):
+        """Turn if possible, nudging him sideways a few px to line up with the opening."""
+        dx, dy, _ = direction
+        if not self._blocked(dx, dy):
+            return True
+
+        for offset in range(1, CORNER_SLACK + 1):
+            for sign in (1, -1):
+                ox = sign * offset if dy != 0 else 0   # turning vertical -> nudge in x
+                oy = sign * offset if dx != 0 else 0   # turning horizontal -> nudge in y
+                self.center_x += ox
+                self.center_y += oy
+                # the nudged spot must be clear, and the new direction must be open from it
+                if not self._blocked(0, 0) and not self._blocked(dx, dy):
+                    return True
+                self.center_x -= ox
+                self.center_y -= oy
+        return False
+
+    def _set_direction(self, direction):
+        dx, dy, angle = direction
+        self.direction = direction
+        self.change_x = dx * MOVEMENT_SPEED
+        self.change_y = dy * MOVEMENT_SPEED
+        self.angle = angle
+
+    def _blocked(self, dx, dy):
+        """True if moving one step in (dx, dy) would hit a wall."""
+        if self.walls is None:
+            return False
+        old_x, old_y = self.center_x, self.center_y
+        self.center_x += dx * MOVEMENT_SPEED
+        self.center_y += dy * MOVEMENT_SPEED
+        hit = arcade.check_for_collision_with_list(self, self.walls)
+        self.center_x, self.center_y = old_x, old_y
+        return len(hit) > 0
+
 
     def update(self, delta_time: float = 1 / 60, **kwargs):
         self.center_x = max(RADIUS, min(WINDOW_WIDTH - RADIUS, self.center_x))
         self.center_y = max(RADIUS, min(WINDOW_HEIGHT - RADIUS, self.center_y))
 
+        # make his turns look better
+        nx, ny, _ = self.next_direction
+        if (nx, ny) != (0, 0) and self._try_turn(self.next_direction):
+            self._set_direction(self.next_direction)
+
         # mouth animation
-        if self.change_x or self.change_y:
+        moving = (self.center_x, self.center_y) != self._last_pos
+        self._last_pos = (self.center_x, self.center_y)
+        if moving:
             self.mouth_timer += delta_time
             if self.mouth_timer >= MOUTH_INTERVAL:
                 self.mouth_timer = 0.0
-                if self.texture is self.open_texture:
-                    self.texture = self.closed_texture
-                else:
-                    self.texture = self.open_texture
+                self.texture = (self.closed_texture
+                                if self.texture is self.open_texture
+                                else self.open_texture)
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.UP:
-            self.change_y = MOVEMENT_SPEED
-            self.angle = 270
-        elif key == arcade.key.DOWN:
-            self.change_y = -MOVEMENT_SPEED
-            self.angle = 90
-        elif key == arcade.key.LEFT:
-            self.change_x = -MOVEMENT_SPEED
-            self.angle = 180
-        elif key == arcade.key.RIGHT:
-            self.change_x = MOVEMENT_SPEED
-            self.angle = 0
+        if key in KEY_TO_DIR:
+            self.next_direction = KEY_TO_DIR[key]
 
     def on_key_release(self, key, modifiers):
-        if key in (arcade.key.UP, arcade.key.DOWN):
-            self.change_y = 0
-        elif key in (arcade.key.LEFT, arcade.key.RIGHT):
-            self.change_x = 0
+        pass

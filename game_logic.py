@@ -81,6 +81,9 @@ class GameView(arcade.View):
 
         # call the physics engine for collisions
         self.pacman_walls = arcade.SpriteList()
+
+        # give pacman a list of the walls
+        self.pacman.walls = self.pacman_walls
         self.pacman_walls.extend(self.wall_list)
         self.pacman_walls.extend(self.ghost_wall_list)
 
