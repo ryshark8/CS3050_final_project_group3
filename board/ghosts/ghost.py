@@ -3,9 +3,6 @@ import random
 from config import *
 
 class Ghost(arcade.Sprite):
-    """
-    when intialized, should only need ghost color, the rest should be handled internally
-    """
 
     FRAME_DURATION = 0.2
     

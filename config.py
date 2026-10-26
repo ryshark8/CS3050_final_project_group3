@@ -18,7 +18,7 @@ difference_h = WINDOW_HEIGHT - BOARD_HEIGHT
 BOARD_BOUNDARIES = ([difference_w / 2, WINDOW_WIDTH - (difference_w / 2)], [difference_h / 2, WINDOW_HEIGHT - (difference_h / 2)]) 
 
 # jail coordinates
-JAIL_CENTER = (276, 345)
+JAIL_CENTER = (253, 315)
 
 MARGIN = 20
 HEADER_HEIGHT = 55
