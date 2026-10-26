@@ -28,7 +28,7 @@ class Inky(Ghost):
         self.textures = self.frames["down"]
         self.texture = self.textures[0]
         self.center_x = JAIL_CENTER[0] - (self.width + 10)
-        self.center_y = JAIL_CENTER[1]
+        self.center_y = JAIL_CENTER[1] - 50
         self.jail_time = self.JAIL_TIME
 
         self.destination = [self.center_x, JAIL_CENTER[1] - 6]

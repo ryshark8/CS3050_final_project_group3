@@ -97,10 +97,10 @@ class GameView(arcade.View):
         self.ghost_list = arcade.SpriteList()
         self.ghost_list.extend(
             [
-                #Inky(barrier_list),
-                Blinky(barrier_list),
-                # Pinky(barrier_list),
-                # Clyde(barrier_list),
+                Inky(barrier_list),
+                #Blinky(barrier_list),
+                Pinky(barrier_list),
+                Clyde(barrier_list),
             ]
         )
 

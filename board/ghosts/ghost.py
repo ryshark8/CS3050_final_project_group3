@@ -28,7 +28,6 @@ class Ghost(arcade.Sprite):
         self.destination = None
         self.path = None
         self.path_pos = 0
-        self.size = TILE_SIZE
         
 
 
@@ -55,16 +54,18 @@ class Ghost(arcade.Sprite):
 
         # jailed ghosts only move up and down
         if self.jail:
-            if self.elapsed_time >= self.jail_time:
-                self.jail = False
+            # if self.elapsed_time >= self.jail_time:
+            #     self.jail = False
 
             direction = self.jail_movement(self)
             self.update_animation(direction=direction)
             self.elapsed_time += delta_time
             return
+
         
         #get new end point
-        direction = self.chase(pacman_pos)
+        #direction = self.chase(pacman_pos)
+        direction = ("x", 0)
         
         #update the animation
         if self.animation_timer >= self.FRAME_DURATION:
