@@ -8,7 +8,7 @@ from pathlib import Path
 
 # some constants
 MOVEMENT_SPEED = 2
-RADIUS = 10
+RADIUS = 9
 DEATH_FRAME_DURATION = 0.12
 MOUTH_INTERVAL = 0.1
 IMAGE_DIR = Path(__file__).parent / "images/pacman"
