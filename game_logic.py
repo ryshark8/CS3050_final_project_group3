@@ -15,6 +15,7 @@ import arcade
 from config import *
 from board import pacman_board
 from pacman import Pacman
+from board.dots_and_fruits.dots import Dot
 
 from board.ghosts.blinky import Blinky
 from board.ghosts.pinky import Pinky
@@ -45,6 +46,7 @@ class GameView(arcade.View):
         self.board = None
         self.pacman = None
         self.ghost_list = None
+        self.dot_list = None
 
         self.physics_engine = None
         self.ghost_engines = None
@@ -67,6 +69,7 @@ class GameView(arcade.View):
 
         self.wall_list = self.board.wall_list
         self.ghost_wall_list = self.board.ghost_wall_list
+        self.dot_list = self.board.dot_list
 
         # sprites
         # pacman
@@ -151,6 +154,12 @@ class GameView(arcade.View):
             else:
                 pass
 
+
+    # handle dot collision
+    def handle_dot_collision(self, hit_list):
+        for dot in hit_list:
+            dot.remove_from_sprite_lists()
+
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
@@ -161,6 +170,10 @@ class GameView(arcade.View):
         hit_ghosts = arcade.check_for_collision_with_list(self.pacman, self.ghost_list)
         if hit_ghosts:
             self.handle_ghost_colision(hit_ghosts)
+
+        hit_dots = arcade.check_for_collision_with_list(self.pacman, self.dot_list)
+        if hit_dots:
+            self.handle_dot_collision(hit_dots)
 
         if self.pacman.is_dying:
             self.pacman.update_death(delta_time)
