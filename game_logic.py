@@ -94,13 +94,15 @@ class GameView(arcade.View):
             top=MARGIN + BOARD_HEIGHT,
         )
 
+        jail_center = level.find_jail_center()
+        print(jail_center)
         self.ghost_list = arcade.SpriteList()
         self.ghost_list.extend(
             [
-                Inky(barrier_list),
-                #Blinky(barrier_list),
-                Pinky(barrier_list),
-                Clyde(barrier_list),
+                Inky(barrier_list, jail_center),
+                #Blinky(barrier_list, jail_center),
+                Pinky(barrier_list, jail_center),
+                Clyde(barrier_list, jail_center),
             ]
         )
 
@@ -131,7 +133,6 @@ class GameView(arcade.View):
         self.clear()
 
         # Call draw() on all your sprite lists below
-        level = self.levels[self.current_level]
         self.board.draw()
 
         # draw the sprites

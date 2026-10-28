@@ -8,9 +8,9 @@ class Blinky(Ghost):
 
     
     #TODO: create a dictionary of attributes based on color of the ghost
-    def __init__(self, barrier_list):
+    def __init__(self, barrier_list, jail_center):
 
-        super().__init__(barrier_list)
+        super().__init__(barrier_list, jail_center)
 
         sprite_files = Path("images/ghosts/blinky")
 
@@ -28,6 +28,6 @@ class Blinky(Ghost):
 
         self.textures = self.frames["down"]
         self.texture = self.textures[0]
-        self.center_x = JAIL_CENTER[0] + self.width + 10
-        self.center_y = JAIL_CENTER[1]
+        self.center_x = self.jail_center + self.width + 10
+        self.center_y = self.jail_center[1]
         

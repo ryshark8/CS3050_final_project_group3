@@ -7,7 +7,7 @@ class Ghost(arcade.Sprite):
     FRAME_DURATION = 0.2
     
     #TODO: create a dictionary of attributes based on color of the ghost
-    def __init__(self, barrier_list):
+    def __init__(self, barrier_list, jail_center):
         super().__init__(self)
 
         self.barrier_list = barrier_list
@@ -21,10 +21,12 @@ class Ghost(arcade.Sprite):
         # for jail functionality
         self.jail_time = None
         self.jail = True
+        self.jail_center = jail_center
 
         self.destination = None
         self.path = None
         self.path_pos = 0
+
         
 
 
@@ -83,11 +85,11 @@ class Ghost(arcade.Sprite):
 
         if self.center_y == self.destination[1]:
             #go down
-            if self.center_y > JAIL_CENTER[1]:
-                self.destination[1] = JAIL_CENTER[1] - 6
+            if self.center_y > self.jail_center[1]:
+                self.destination[1] = self.jail_center[1] - 6
 
             else:
-                self.destination[1] = JAIL_CENTER[1] + 6
+                self.destination[1] = self.jail_center[1] + 6
 
         distance = self.destination[1] - self.center_y
         speed = min(self.speed, abs(distance))

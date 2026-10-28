@@ -21,9 +21,9 @@ class Level:
         self.rows = len(self.maze)
         self.cols = max(len(row) for row in self.maze)
         self.maze = [row.ljust(self.cols)[:self.cols] for row in self.maze]
-        self.board_width = self.cols * tile_size
+        self.board_width = self.cols * tile_size + TILE_SIZE
         self.board_height = self.rows * tile_size
-        self.screen_width = self.board_width + 2 * margin
+        self.screen_width = self.board_width
         self.screen_height = self.board_height + header_height + 2 * margin
         print("Rows:", len(maze))
         print("Columns:", len(maze[0]))
@@ -31,9 +31,9 @@ class Level:
     # Convert grid coordinates to screen coordinates
     def cell_center(self, row, col):
         # Find horizontal center of tile
-        x = margin + col * tile_size + tile_size / 2
+        x = (col + 1) * tile_size
         # Find vertical center of tile
-        y = margin + (self.rows - 1 - row) * tile_size + tile_size / 2
+        y = (self.rows - row) * tile_size
         return x, y
 
     def find_jail_center(self):
@@ -44,6 +44,6 @@ class Level:
                 tile = self.maze[row][col]
 
                 if tile == "*":
-                    jail_center = (row, col)
+                    jail_center = (row * TILE_SIZE, (col * TILE_SIZE) + header_height + margin)
 
         return jail_center
