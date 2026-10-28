@@ -22,7 +22,7 @@ KEY_TO_DIR = {
 }
 
 # how many px off from a corridor that he will still take
-CORNER_SLACK = 6
+CORNER_SLACK = 5
 
 class Pacman(arcade.Sprite):
     def __init__(self, x, y):
@@ -59,7 +59,7 @@ class Pacman(arcade.Sprite):
 
         # coords for where to spawn pacman, right below the ghost prison or whatever
         self.spawn_x = 250
-        self.spawn_y = 260
+        self.spawn_y = 258
 
         # death attributes
         self.death_frame = 0
