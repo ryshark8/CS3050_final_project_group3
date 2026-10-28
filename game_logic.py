@@ -16,6 +16,7 @@ from config import *
 from board import pacman_board
 from pacman import Pacman
 from board.dots_and_fruits.fruits import Fruit, fruit_for_level, LEVEL_FRUIT
+from board.dots_and_fruits.dots import Dot
 
 from board.ghosts.blinky import Blinky
 from board.ghosts.pinky import Pinky
@@ -47,6 +48,7 @@ class GameView(arcade.View):
         self.pacman = None
         self.ghost_list = None
         self.fruit_list = None
+        self.dot_list = None
 
         self.physics_engine = None
         self.ghost_engines = None
@@ -54,7 +56,7 @@ class GameView(arcade.View):
         self.barrier_list = None
 
         self.current_score_label = None
-        self.current_score = 0
+        self.current_score = None
 
         self.levels = [self.level]
         self.current_level = 0
@@ -72,6 +74,7 @@ class GameView(arcade.View):
 
         self.wall_list = self.board.wall_list
         self.ghost_wall_list = self.board.ghost_wall_list
+        self.dot_list = self.board.dot_list
 
         # ---------- sprites --------------
         # pacman
@@ -81,13 +84,16 @@ class GameView(arcade.View):
 
         # coords for where to spawn pacman, right below the ghost prison or whatever
         spawn_x = 250
-        spawn_y = 260
+        spawn_y = 258
 
         self.pacman = Pacman(spawn_x, spawn_y)
         self.sprites.append(self.pacman)
 
         # call the physics engine for collisions
         self.pacman_walls = arcade.SpriteList()
+
+        # give pacman a list of the walls
+        self.pacman.walls = self.pacman_walls
         self.pacman_walls.extend(self.wall_list)
         self.pacman_walls.extend(self.ghost_wall_list)
 
@@ -173,6 +179,12 @@ class GameView(arcade.View):
             kind = fruit_for_level(self.current_level)
             self.fruit_list.append(Fruit(kind, 250, 260))
 
+
+    # handle dot collision
+    def handle_dot_collision(self, hit_list):
+        for dot in hit_list:
+            dot.remove_from_sprite_lists()
+
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
@@ -183,6 +195,10 @@ class GameView(arcade.View):
         hit_ghosts = arcade.check_for_collision_with_list(self.pacman, self.ghost_list)
         if hit_ghosts:
             self.handle_ghost_colision(hit_ghosts)
+
+        hit_dots = arcade.check_for_collision_with_list(self.pacman, self.dot_list)
+        if hit_dots:
+            self.handle_dot_collision(hit_dots)
 
         if self.pacman.is_dying:
             self.pacman.update_death(delta_time)
