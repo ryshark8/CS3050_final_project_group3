@@ -80,11 +80,6 @@ class Pacman(arcade.Window):
         self.x = max(RADIUS, min(SCREEN_WIDTH - RADIUS, self.x))
         self.y = max(RADIUS, min(SCREEN_HEIGHT - RADIUS, self.y))
 
-        if self.x > SCREEN_WIDTH - RADIUS:
-            self.x = 0
-        elif self.x < RADIUS:
-            self.x = SCREEN_WIDTH - RADIUS
-
         # animate the movement of his mouth
         if self.change_x or self.change_y:
             self.mouth_timer += delta_time
