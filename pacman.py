@@ -189,11 +189,6 @@ class Pacman(arcade.Sprite):
     def on_key_release(self, key, modifiers):
         pass
 
-        if self.x > SCREEN_WIDTH - RADIUS:
-            self.x = 0
-        elif self.x < RADIUS:
-            self.x = SCREEN_WIDTH - RADIUS
-
         # animate the movement of his mouth
         if self.change_x or self.change_y:
             self.mouth_timer += delta_time
