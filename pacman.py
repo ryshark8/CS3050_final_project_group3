@@ -188,3 +188,25 @@ class Pacman(arcade.Sprite):
 
     def on_key_release(self, key, modifiers):
         pass
+
+        if self.x > SCREEN_WIDTH - RADIUS:
+            self.x = 0
+        elif self.x < RADIUS:
+            self.x = SCREEN_WIDTH - RADIUS
+
+        # animate the movement of his mouth
+        if self.change_x or self.change_y:
+            self.mouth_timer += delta_time
+            if self.mouth_timer >= MOUTH_INTERVAL:
+                if self.start_angle == 45:
+                    self.start_angle = 0
+                    self.end_angle = 360
+                else:
+                    self.start_angle = 45
+                    self.end_angle = 315
+
+def pacman():
+    Pacman(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    arcade.run()
+
+pacman()
