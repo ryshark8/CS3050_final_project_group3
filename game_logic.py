@@ -17,6 +17,7 @@ from board import pacman_board
 from pacman import Pacman
 from board.dots_and_fruits.fruits import Fruit, fruit_for_level, LEVEL_FRUIT
 from board.dots_and_fruits.dots import Dot
+from board.pacman_board import *
 
 from board.ghosts.blinky import Blinky
 from board.ghosts.pinky import Pinky
@@ -56,7 +57,7 @@ class GameView(arcade.View):
         self.barrier_list = None
 
         self.current_score_label = None
-        self.current_score = None
+        self.current_score = 0
 
         self.levels = [self.level]
         self.current_level = 0
@@ -133,7 +134,7 @@ class GameView(arcade.View):
 
         kind = LEVEL_FRUIT[self.test_fruit_index]
         self.fruit_list.append(Fruit(kind, 265, 247))
-        print(f"Spawned: {kind}")
+        if DEBUG: print(f"Spawned: {kind}")
 
         # move to the next fruit, wrapping back to the start
         self.test_fruit_index = (self.test_fruit_index + 1) % len(LEVEL_FRUIT)
@@ -183,7 +184,13 @@ class GameView(arcade.View):
     # handle dot collision
     def handle_dot_collision(self, hit_list):
         for dot in hit_list:
+            self.add_score(10)
             dot.remove_from_sprite_lists()
+            if DEBUG: print(self.current_score)
+
+    def add_score(self, points):
+        self.current_score += points
+        self.board.current_score_number.text = str(self.current_score)
 
     def on_update(self, delta_time):
         """
@@ -205,7 +212,7 @@ class GameView(arcade.View):
             if self.pacman.is_dead:  # death animation has finished
                 self.pacman.kill_pacman()
                 if self.pacman.lives <= 0:
-                    print("Game over")  # TODO: replace with a game over screen
+                    if DEBUG: print("Game over")  # TODO: replace with a game over screen
             return  # freeze ghosts while dying
 
         self.ghost_list.update(delta_time=delta_time, pacman_pos=self.pacman.position)
@@ -220,8 +227,9 @@ class GameView(arcade.View):
 
         self.fruit_list.update(delta_time=delta_time)
         for fruit in arcade.check_for_collision_with_list(self.pacman, self.fruit_list):
-            self.current_score += fruit.points
+            self.add_score(fruit.points)
             fruit.remove_from_sprite_lists()
+            if DEBUG: print(self.current_score)
 
     def on_key_press(self, key, key_modifiers):
         """
