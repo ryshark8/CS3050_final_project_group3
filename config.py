@@ -33,5 +33,5 @@ HIGH_SCORE_POSITION = 12
 LINE_COLOR = (40, 50, 255)
 FILL_COLOR = (10, 10, 100)
 
-# Debug constants
+# Debug constant
 DEBUG = True

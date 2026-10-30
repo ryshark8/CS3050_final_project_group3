@@ -3,6 +3,7 @@
 # some imports
 import arcade
 from pathlib import Path
+from config import *
 
 # path to image folder
 IMAGE_DIR = Path(__file__).parent / "../../images/fruits/"
@@ -65,4 +66,5 @@ class Fruit(arcade.Sprite):
         self.time_left -= delta_time
         if self.time_left <= 0:
             # get rid of it if it has not been eaten in FRUIT_LIFETIME
+            if DEBUG: print(f"Fruit timeout destroying {self.kind}")
             self.remove_from_sprite_lists()

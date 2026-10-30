@@ -62,9 +62,6 @@ class GameView(arcade.View):
         self.levels = [self.level]
         self.current_level = 0
 
-        # to test what all of the fruits look like on the board
-        # get rid of when done
-        self.test_fruit_index = 0
         self.reset()
 
     def setup(self):
@@ -121,23 +118,15 @@ class GameView(arcade.View):
         # engine for pacman
         self.physics_engine = arcade.PhysicsEngineSimple(self.pacman, self.pacman_walls)
 
-        # one engine for each of the ghost
+        # one engine for each of the ghosts
         self.ghost_engines = [
             arcade.PhysicsEngineSimple(ghost, self.wall_list)
             for ghost in self.ghost_list
         ]
 
-    # also a method to test what all of the fruits look like at each of their levels
-    # get rid of it when done
-    def spawn_test_fruit(self):
-        self.fruit_list.clear()
-
-        kind = LEVEL_FRUIT[self.test_fruit_index]
-        self.fruit_list.append(Fruit(kind, 265, 247))
-        if DEBUG: print(f"Spawned: {kind}")
-
-        # move to the next fruit, wrapping back to the start
-        self.test_fruit_index = (self.test_fruit_index + 1) % len(LEVEL_FRUIT)
+        # when to spawn each of the fruits
+        self.dots_eaten = 0
+        self.next_fruit_index = 0
 
     def reset(self):
         """Reset the game to the initial state."""
@@ -178,15 +167,23 @@ class GameView(arcade.View):
     def spawn_fruit(self):
         if len(self.fruit_list) == 0:  # only one at a time
             kind = fruit_for_level(self.current_level)
-            self.fruit_list.append(Fruit(kind, 250, 260))
-
+            self.fruit_list.append(Fruit(kind, 265, 247))
+            if DEBUG: print(f"Spawned: {kind}")
 
     # handle dot collision
     def handle_dot_collision(self, hit_list):
         for dot in hit_list:
+            self.dots_eaten += 1
             self.add_score(10)
             dot.remove_from_sprite_lists()
-            if DEBUG: print(self.current_score)
+            if DEBUG: print(f"Score: {self.current_score}, Dots eaten: {self.dots_eaten}")
+
+            # (70, 160) here is the threshold for spawning fruits
+            # so when you eat 70 one spawns and when you eat 157 one spawns
+            # In the real game it is 170, but we do not have enough dots on the board
+            # there are 157 dots on the board
+            if self.dots_eaten in (70, 157):
+                self.spawn_fruit()
 
     def add_score(self, points):
         self.current_score += points
@@ -229,7 +226,11 @@ class GameView(arcade.View):
         for fruit in arcade.check_for_collision_with_list(self.pacman, self.fruit_list):
             self.add_score(fruit.points)
             fruit.remove_from_sprite_lists()
-            if DEBUG: print(self.current_score)
+
+            # debug print, what he ate and what the score is
+            if DEBUG:
+                print(f"Pacman ate a {fruit.kind} + {fruit.points} points\n"
+                      f"Score: {self.current_score}, Dots eaten: {self.dots_eaten}")
 
     def on_key_press(self, key, key_modifiers):
         """
@@ -243,11 +244,6 @@ class GameView(arcade.View):
             return
         # move pacman
         self.pacman.on_key_press(key, key_modifiers)
-
-        # TODO: change call fruit to happen when you eat enough dots
-        # happens when you press f now, for testing
-        if key == arcade.key.F:
-            self.spawn_test_fruit()
 
     def on_key_release(self, key, key_modifiers):
         """
