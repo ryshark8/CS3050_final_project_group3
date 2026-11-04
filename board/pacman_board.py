@@ -21,6 +21,7 @@ class PacmanBoard:
     def __init__(self, level):
 
         self.level = level
+        self.score = 0
 
         maze = self.level.maze
         cell_center = self.level.cell_center

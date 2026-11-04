@@ -71,7 +71,7 @@ class Pacman(arcade.Sprite):
         self.next_direction = (0, 0, 0)
         self._last_pos = (x, y)
 
-        # scale the image so he is RADIUS * 2 pixels wide, whatever the file size
+        # scale the image so he is RADIUS * 2 pixels wide
         self.scale = (RADIUS * 2) / self.open_texture.width
 
         self.mouth_timer = 0.0
