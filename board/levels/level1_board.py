@@ -1,5 +1,5 @@
 """
-Level information for level 1
+Board for level 1
 """
 
 maze = [
