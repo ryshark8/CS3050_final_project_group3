@@ -25,6 +25,7 @@ class Level:
         self.board_height = self.rows * tile_size
         self.screen_width = self.board_width + 2 * margin
         self.screen_height = self.board_height + header_height + 2 * margin
+        print(self.screen_width, self.screen_height)
         if DEBUG: print("Rows:", len(maze))
         if DEBUG: print("Columns:", len(maze[0]))
 

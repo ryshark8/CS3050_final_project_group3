@@ -14,6 +14,9 @@ import arcade
 # some file imports
 from config import *
 from board import pacman_board
+from board.levels import level1_board
+from board.levels import level2_board
+from board.levels.level import *
 from pacman import Pacman
 from board.dots_and_fruits.fruits import Fruit, fruit_for_level, LEVEL_FRUIT
 from board.dots_and_fruits.dots import Dot
@@ -33,10 +36,11 @@ class GameView(arcade.View):
     with your own code. Don't leave 'pass' in this program.
     """
 
-    def __init__(self, level):
+    def __init__(self):
         super().__init__()
 
-        self.level = level
+        self.level_1 = Level(level1_board.maze)
+        self.level_2 = Level(level2_board.maze)
 
         self.background_color = (5, 5, 12)
 
@@ -59,7 +63,7 @@ class GameView(arcade.View):
         self.current_score_label = None
         self.current_score = 0
 
-        self.levels = [self.level]
+        self.levels = [self.level_1, self.level_2]
         self.current_level = 0
 
         self.reset()
@@ -73,6 +77,7 @@ class GameView(arcade.View):
         self.wall_list = self.board.wall_list
         self.ghost_wall_list = self.board.ghost_wall_list
         self.dot_list = self.board.dot_list
+        self.num_dots = len(self.dot_list)
 
         # ---------- sprites --------------
         # pacman
@@ -130,6 +135,7 @@ class GameView(arcade.View):
 
     def reset(self):
         """Reset the game to the initial state."""
+        self.setup()
         # Do changes needed to restart the game here if you want to support that
         pass
 
@@ -184,6 +190,11 @@ class GameView(arcade.View):
             # there are 157 dots on the board
             if self.dots_eaten in (70, 157):
                 self.spawn_fruit()
+
+            if self.dots_eaten == self.num_dots:
+                self.current_level += 1
+                self.reset()
+
 
     def add_score(self, points):
         self.current_score += points

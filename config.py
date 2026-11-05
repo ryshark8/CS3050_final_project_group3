@@ -3,8 +3,8 @@ A file for keeping global constants
 """
 
 # window constants
-WINDOW_WIDTH = 550
-WINDOW_HEIGHT = 700
+WINDOW_WIDTH = 517
+WINDOW_HEIGHT = 653
 WINDOW_TITLE = "Pac-Man"
 
 # board constants
