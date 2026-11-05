@@ -2,6 +2,8 @@
 Pac-Man sprite
 """
 
+import arcade
+from config import *
 from pathlib import Path
 import arcade
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, DEBUG
@@ -223,3 +225,4 @@ class Pacman(arcade.Sprite):
         """ handle keyboard events """
         if key in KEY_TO_DIR:
              self.next_direction = KEY_TO_DIR[key]
+
