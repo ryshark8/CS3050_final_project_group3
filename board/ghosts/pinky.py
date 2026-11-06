@@ -8,9 +8,9 @@ class Pinky(Ghost):
     JAIL_TIME = 10
     
     #TODO: create a dictionary of attributes based on color of the ghost
-    def __init__(self, barrier_list, jail_center):
+    def __init__(self, jail_center):
 
-        super().__init__(barrier_list, jail_center)
+        super().__init__(jail_center)
 
         sprite_files = Path("images/ghosts/pinky")
 
@@ -35,59 +35,38 @@ class Pinky(Ghost):
         self.destination = [self.center_x, self.jail_center[1] + 12]
 
 
-    # def update():
-    #     pass
-        
+    def chase(self, pacman_pos):
 
-    # def update_animation(self, direction):
+        if self.path == None:
+            self.path = arcade.astar_calculate_path(
+                start_point=self.position,
+                end_point=pacman_pos,
+                astar_barrier_list=self.barrier_list,
+                diagonal_movement=False,
+            )
+        print(self.path)
+        self.destination = self.path[self.path_pos]
 
-    #     # make sure eyes are correct
-    #     if direction[0] == 'x':
-    #         if direction[1] > 0:
-    #             self.textures = self.frames['right']
-    #         else:
-    #             self.textures = self.frames['left']
+        #check to see if we've reached the next point on the path
+        if self.position == self.destination:
+            self.path_pos += 1
+            self.destination = self.path[self.path_pos]
 
-    #     else:
-    #         if direction[1] > 0:
-    #             self.textures = self.frames['up']
-    #         else:
-    #             self.textures = self.frames['down']
+        x_diff = self.destination[0] - self.center_x
+        y_diff = self.destination[1] - self.center_y
 
-    #     self.cur_texture_index = (self.cur_texture_index + 1) % len(self.textures)
-    #     self.texture = self.textures[self.cur_texture_index]
+        #can only move orthogonally
+        if x_diff:
+            speed = min(self.speed, abs(x_diff))
+            sign = (x_diff > 0) - (x_diff < 0)
+            self.center_x += speed * sign
+            direction = ('x', x_diff)
 
-    # def update(self, delta_time):
-
-    #     # movement logic
-    #     start_x = self.center_x
-    #     start_y = self.center_y
-
-    #     self.dest_x = 500
-    #     self.dest_y = 400
-
-    #     x_diff = self.dest_x - start_x
-    #     y_diff = self.dest_y - start_y
-
-    #     #can only move orthogonally
-    #     if x_diff:
-    #         speed = min(self.speed, x_diff)
-    #         self.center_x += speed
-    #         direction = ('x', x_diff)
-    #     elif y_diff:
-    #         speed = min(self.speed, y_diff)
-    #         self.center_y += speed
-    #         direction = ('y', y_diff)
-        
-    #     #update the animation
-    #     if self.animation_timer >= self.FRAME_DURATION:
-    #         self.update_animation(delta_time=delta_time, direction=direction)
-    #         self.animation_timer = 0
+        elif y_diff:
+            speed = min(self.speed, abs(y_diff))
+            sign = (y_diff > 0) - (y_diff < 0)
+            self.center_y += speed * sign
+            direction = ('y', y_diff)
 
 
-    #     self.elapsed_time += delta_time
-    #     self.animation_timer += delta_time
-
-        
-
-        
+        return direction

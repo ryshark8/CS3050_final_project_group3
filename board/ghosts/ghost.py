@@ -1,36 +1,66 @@
 import arcade
 import random
 from config import *
+from enum import Enum
 
 class Ghost(arcade.Sprite):
 
-    FRAME_DURATION = 0.2
-    
-    #TODO: create a dictionary of attributes based on color of the ghost
-    def __init__(self, barrier_list, jail_center):
-        super().__init__(self)
+    FRAME_DURATION = 0.5
 
-        self.barrier_list = barrier_list
+    #currently hardcoding this but it may be a good idea going forward to get this via parameter from Level because it will change
+    CHASE = []
+    SCATTER = [5, 5, 7, 7]
+
+    """
+    Mode represents state of the ghosts in the game which are triggered by different events.
+    Each mode has an associated movement pattern and/or texture
+    """
+    class Mode(Enum):
+        JAIL = "jail"
+        CHASE = "chase"
+        SCATTER = "scatter"
+        SCARED = "scared"
+        EATEN = "eaten"
+
+    def __init__(self, jail_center, sprite_files):
+
+        super().__init__()
+
+        frames = [arcade.load_texture(str(frame)) for frame in sprite_files.iterdir()]
+        
+        self.frames = {
+            "down": frames[:2],
+            "left": frames[2:4],
+            "right": frames[4:6],
+            "up": frames[6:],
+        }
+
+        self.textures = self.frames["down"]
+        self.texture = self.textures[0]
+        self.size = (TILE_SIZE * 2, TILE_SIZE * 2)
+
+        self.barrier_list = None
 
         self.elapsed_time = 0
-        self.scale = 1.5
         self.animation_timer = 0
-        self.found = False
-        self.speed = 1 
+        self.move_timer = 0
+        self.speed = 2
 
         # for jail functionality
         self.jail_time = None
-        self.jail = True
         self.jail_center = jail_center
+
+        self.mode = self.Mode.JAIL
 
         self.destination = None
         self.path = None
-        self.path_pos = 0
-
-        
+        self.path_index = 0
+        self.assigned_corner = None
+        self.new_path = True
 
 
     def update_animation(self, direction):
+
         # make sure eyes are correct
         if direction[0] == 'x':
             if direction[1] > 0:
@@ -49,39 +79,38 @@ class Ghost(arcade.Sprite):
 
     def update(self, delta_time, pacman_pos):
         # movement logic
-        
+        match self.mode.value:
 
-        # jailed ghosts only move up and down
-        if self.jail:
-            # if self.elapsed_time >= self.jail_time:
-            #     self.jail = False
+            case "jail":
 
-            direction = self.jail_movement(self)
-            self.update_animation(direction=direction)
-            self.elapsed_time += delta_time
-            return
+                if self.elapsed_time >= self.jail_time:
+                    self.mode = self.Mode.SCATTER
+                    return
+                
+                direction = self.jail(self)
+                
+            case "chase":
+                direction = self.chase(pacman_pos)
 
-        
-        #get new end point
-        #direction = self.chase(pacman_pos)
-        direction = ("x", 0)
+            case "scatter":
+                direction = self.scatter()
+
+            case "eaten":
+                pass
+            case "scared":
+                pass
         
         #update the animation
         if self.animation_timer >= self.FRAME_DURATION:
             self.update_animation(direction=direction)
             self.animation_timer = 0
 
-
+        self.move_timer += delta_time
         self.elapsed_time += delta_time
         self.animation_timer += delta_time
 
-
-    #TODO: create logic for scared ghost movement
-    def scared(self):
-        pass
-
     @staticmethod
-    def jail_movement(self):
+    def jail(self):
 
         if self.center_y == self.destination[1]:
             #go down
@@ -98,5 +127,71 @@ class Ghost(arcade.Sprite):
         
         return ('y', distance)
 
-    def chase(self, pacman_pos):
+    def chase(self, **kwargs):
         pass
+
+    def scatter(self):
+
+        if self.new_path:
+            x = random.randint(self.assigned_corner["left"], self.assigned_corner["right"])
+            y = random.randint(self.assigned_corner["bottom"], self.assigned_corner["top"])
+            self.path = arcade.astar_calculate_path(
+                start_point=self.position,
+                end_point= (x, y),
+                astar_barrier_list=self.barrier_list,
+                diagonal_movement=False,
+            )
+            self.chase_timer = 0
+            self.path_index = 0
+            self.new_path = False
+
+        self.destination = self.path[self.path_index]
+
+        #check to see if we've reached the next point on the path
+        if self.position == self.destination:
+            self.path_index += 1
+            self.destination = self.path[self.path_index]
+
+        direction = self.move()
+
+        #check to see if we should go back to chasing yet
+        if self.move_timer >= self.SCATTER[1]:
+            self.mode = self.Mode.CHASE
+            self.move_timer = 0
+            self.new_path = True
+
+        elif self.position == self.path[-1]:
+            self.new_pth = True
+    
+        return direction
+
+    def scared(self):
+        pass
+
+    def eaten(self):
+        pass
+
+    """
+    General orthogonal movement function
+    """
+    def move(self):
+
+        x_diff = self.destination[0] - self.center_x
+        y_diff = self.destination[1] - self.center_y
+
+        #can only move orthogonally
+        if x_diff:
+            speed = min(self.speed, abs(x_diff))
+            sign = (x_diff > 0) - (x_diff < 0)
+            self.center_x += speed * sign
+            direction = ('x', x_diff)
+
+        elif y_diff:
+            speed = min(self.speed, abs(y_diff))
+            sign = (y_diff > 0) - (y_diff < 0)
+            self.center_y += speed * sign
+            direction = ('y', y_diff)
+
+        return direction
+        
+        

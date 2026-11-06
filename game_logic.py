@@ -77,7 +77,7 @@ class GameView(arcade.View):
 
         # coords for where to spawn pacman, right below the ghost prison or whatever
         spawn_x = 250
-        spawn_y = 260
+        spawn_y = 350
 
         self.pacman = Pacman(spawn_x, spawn_y)
         self.sprites.append(self.pacman)
@@ -87,36 +87,12 @@ class GameView(arcade.View):
         self.pacman_walls.extend(self.wall_list)
         self.pacman_walls.extend(self.ghost_wall_list)
 
-        barrier_list = arcade.AStarBarrierList(
-            moving_sprite=self.pacman,
-            blocking_sprites=self.wall_list,
-            grid_size=TILE_SIZE,
-            left=MARGIN,
-            right=MARGIN + BOARD_WIDTH,
-            bottom=MARGIN,
-            top=MARGIN + BOARD_HEIGHT,
-        )
-
-        jail_center = level.find_jail_center()
-        print(jail_center)
-        self.ghost_list = arcade.SpriteList()
-        self.ghost_list.extend(
-            [
-                Inky(barrier_list, jail_center),
-                #Blinky(barrier_list, jail_center),
-                Pinky(barrier_list, jail_center),
-                Clyde(barrier_list, jail_center),
-            ]
-        )
+        self.ghost_list = initializeGhosts(self, jail_center=level.find_jail_center(), board_rows=level.rows, board_cols=level.cols)
 
         # engine for pacman
         self.physics_engine = arcade.PhysicsEngineSimple(self.pacman, self.pacman_walls)
 
-        # one engine for each of the ghost
-        self.ghost_engines = [
-            arcade.PhysicsEngineSimple(ghost, self.wall_list)
-            for ghost in self.ghost_list
-        ]
+        
 
     def reset(self):
         """Reset the game to the initial state."""
@@ -184,8 +160,7 @@ class GameView(arcade.View):
         self.ghost_list.update(delta_time=delta_time, pacman_pos=self.pacman.position)
         self.sprites.update(delta_time)
         self.physics_engine.update()
-        for engine in self.ghost_engines:
-            engine.update()
+    
 
         hit_ghosts = arcade.check_for_collision_with_list(self.pacman, self.ghost_list)
         if hit_ghosts:
@@ -227,6 +202,36 @@ class GameView(arcade.View):
         Called when a user releases a mouse button.
         """
         pass
+
+"""
+Function for creating the ghost sprite list and passing barrier lists into ghost for A* pathfinding
+"""
+def initializeGhosts(self, jail_center, board_cols, board_rows):
+    ghost_list = arcade.SpriteList()
+    ghost_list.extend(
+        [
+            Inky(jail_center, board_cols=board_cols, board_rows=board_cols),
+            #Blinky(jail_center),
+            #Pinky(jail_center),
+            #Clyde(jail_center),
+        ]
+    )
+
+    barrier_list = arcade.AStarBarrierList(
+                moving_sprite=ghost_list[0],
+                blocking_sprites=self.wall_list,
+                grid_size=TILE_SIZE,
+                left= 0,
+                right= board_cols * TILE_SIZE,
+                bottom= 0,
+                top= board_rows * TILE_SIZE,
+    )
+    
+    for ghost in ghost_list:
+        ghost.barrier_list = barrier_list
+
+    return ghost_list
+    
 
 
 def main():
