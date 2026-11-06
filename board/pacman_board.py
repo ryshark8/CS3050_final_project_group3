@@ -17,19 +17,20 @@ high_score_position = HIGH_SCORE_POSITION
 margin = MARGIN
 header_height = HEADER_HEIGHT
 
-class PacmanBoard:
+class PacmanBoard():
     def __init__(self, level):
 
         self.level = level
+        self.score = 0
 
         maze = self.level.maze
         cell_center = self.level.cell_center
-        rows = self.level.rows
-        cols = self.level.cols
+        # rows = self.level.rows
+        # cols = self.level.cols
 
         screen_width = self.level.screen_width
-        screen_height = self.level.screen_height
-        board_width = self.level.board_width
+        # screen_height = self.level.screen_height
+        # board_width = self.level.board_width
         board_height = self.level.board_height
 
         self.dots = Dot()

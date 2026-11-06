@@ -3,8 +3,8 @@ A file for keeping global constants
 """
 
 # window constants
-WINDOW_WIDTH = 550
-WINDOW_HEIGHT = 700
+WINDOW_WIDTH = 517
+WINDOW_HEIGHT = 653
 WINDOW_TITLE = "Pac-Man"
 
 # board constants
@@ -13,9 +13,10 @@ BOARD_HEIGHT = 600
 BOARD_SIZE = BOARD_WIDTH * BOARD_HEIGHT
 
 #where the board is w/ respect to the window
-difference_w = WINDOW_WIDTH - BOARD_WIDTH
+DIFFERENCE_W = WINDOW_WIDTH - BOARD_WIDTH
 difference_h = WINDOW_HEIGHT - BOARD_HEIGHT
-BOARD_BOUNDARIES = ([difference_w // 2, WINDOW_WIDTH - (difference_w // 2)], [difference_h // 2, WINDOW_HEIGHT - (difference_h // 2)])
+BOARD_BOUNDARIES = ([DIFFERENCE_W // 2, WINDOW_WIDTH - (DIFFERENCE_W // 2)], 
+                    [difference_h // 2, WINDOW_HEIGHT - (difference_h // 2)])
 
 # jail coordinates
 JAIL_CENTER = (253, 315)
@@ -33,5 +34,5 @@ HIGH_SCORE_POSITION = 12
 LINE_COLOR = (40, 50, 255)
 FILL_COLOR = (10, 10, 100)
 
-# Debug constants
+# Debug constant
 DEBUG = True
