@@ -15,7 +15,7 @@ high_score_position = HIGH_SCORE_POSITION
 margin = MARGIN
 header_height = HEADER_HEIGHT
 
-class Level:
+class Level():
     def __init__(self, maze):
         self.maze = maze
         self.rows = len(self.maze)
@@ -26,8 +26,9 @@ class Level:
         self.screen_width = self.board_width + 2 * margin
         self.screen_height = self.board_height + header_height + 2 * margin
         print(self.screen_width, self.screen_height)
-        if DEBUG: print("Rows:", len(maze))
-        if DEBUG: print("Columns:", len(maze[0]))
+        if DEBUG:
+            print("Rows:", len(maze))
+            print("Columns:", len(maze[0]))
 
     # Convert grid coordinates to screen coordinates
     def cell_center(self, row, col):
