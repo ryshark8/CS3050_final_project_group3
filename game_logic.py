@@ -212,6 +212,7 @@ class GameView(arcade.View):
     # handle what happens when ghost and pacman collide
     def handle_ghost_collision(self, ghost_list):
         for ghost in ghost_list:
+            # TODO: this is where the ghost eaten logic should go!
             if ghost: # is frightened
                 # respawn the ghost
                 # add to the score
