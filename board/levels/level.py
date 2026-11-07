@@ -46,6 +46,8 @@ class Level():
                 tile = self.maze[row][col]
 
                 if tile == "*":
-                    jail_center = (row * TILE_SIZE, (col * TILE_SIZE) + header_height + margin)
+                    jail_center = (row * TILE_SIZE, (col * TILE_SIZE))
+                    
+        # jail_center = (self.board_height/2, self.board_width)
 
         return jail_center

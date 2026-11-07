@@ -8,7 +8,8 @@ class Ghost(arcade.Sprite):
     FRAME_DURATION = 0.5
 
     #currently hardcoding this but it may be a good idea going forward to get this via parameter from Level because it will change
-    CHASE = []
+    CHASE_TIME_ITER = 4 # time between path recalculations when chasing pacman
+    CHASE_TIME_TOTAL = 20
     SCATTER = [5, 5, 7, 7]
 
     """
@@ -84,10 +85,10 @@ class Ghost(arcade.Sprite):
             case "jail":
 
                 if self.elapsed_time >= self.jail_time:
-                    self.mode = self.Mode.SCATTER
+                    self.mode = self.Mode.CHASE
                     return
                 
-                direction = self.jail(self)
+                direction = self.jail(self, pacman_pos)
                 
             case "chase":
                 direction = self.chase(pacman_pos)
@@ -110,7 +111,7 @@ class Ghost(arcade.Sprite):
         self.animation_timer += delta_time
 
     @staticmethod
-    def jail(self):
+    def jail(self, pacman_pos):
 
         if self.center_y == self.destination[1]:
             #go down
@@ -124,11 +125,63 @@ class Ghost(arcade.Sprite):
         speed = min(self.speed, abs(distance))
         sign = (distance > 0) - (distance < 0)
         self.center_y += speed * sign
+
+        # to help avoid not having a path once chasing starts
+        if self.path == None and self.elapsed_time >= self.jail_time:
+            self.path = arcade.astar_calculate_path(
+                start_point=self.position,
+                end_point=pacman_pos,
+                astar_barrier_list=self.barrier_list,
+                diagonal_movement=False,
+            ) 
         
         return ('y', distance)
 
-    def chase(self, **kwargs):
-        pass
+    def chase(self, pacman_pos):
+        #check to see if a new path is needed
+        if self.new_path:
+            path = arcade.astar_calculate_path(
+                start_point=self.position,
+                end_point=pacman_pos,
+                astar_barrier_list=self.barrier_list,
+                diagonal_movement=False,
+            ) 
+
+            if  path:
+                self.path = path
+                self.path_index = 0
+                self.destination = self.path[self.path_index]
+
+            self.new_path = False
+        
+        #check to see if we've reached the next point on the path
+        if self.position == self.destination:
+
+            #if we've reached the end of the current path before getting a new one, reverse
+            if self.path_index == len(self.path) - 1:
+                self.path_index -= 1
+                self.new_path = True
+                self.move_timer = 0
+
+            else:
+                self.path_index += 1
+
+            self.destination = self.path[self.path_index]
+
+        direction = self.move()
+
+        # check for needing a new path next time through or moving to scatter
+        # if self.move_timer >= self.CHASE_TIME_TOTAL:
+        #     self.mode = self.Mode.SCATTER
+        #     self.move_timer = 0
+        #     self.new_path = True
+
+        if self.move_timer >= self.CHASE_TIME_ITER or self.position == self.path[-1]:
+            self.move_timer = 0
+            self.new_path = True
+
+
+        return direction
 
     def scatter(self):
 
@@ -161,7 +214,7 @@ class Ghost(arcade.Sprite):
             self.new_path = True
 
         elif self.position == self.path[-1]:
-            self.new_pth = True
+            self.new_path = True
     
         return direction
 
@@ -176,21 +229,25 @@ class Ghost(arcade.Sprite):
     """
     def move(self):
 
-        x_diff = self.destination[0] - self.center_x
-        y_diff = self.destination[1] - self.center_y
+        direction = ('x', 0)
+        if self.destination != None:
+            
+            x_diff = self.destination[0] - self.center_x
+            y_diff = self.destination[1] - self.center_y
 
-        #can only move orthogonally
-        if x_diff:
-            speed = min(self.speed, abs(x_diff))
-            sign = (x_diff > 0) - (x_diff < 0)
-            self.center_x += speed * sign
-            direction = ('x', x_diff)
 
-        elif y_diff:
-            speed = min(self.speed, abs(y_diff))
-            sign = (y_diff > 0) - (y_diff < 0)
-            self.center_y += speed * sign
-            direction = ('y', y_diff)
+            #can only move orthogonally
+            if x_diff:
+                speed = min(self.speed, abs(x_diff))
+                sign = (x_diff > 0) - (x_diff < 0)
+                self.center_x += speed * sign
+                direction = ('x', x_diff)
+
+            elif y_diff:
+                speed = min(self.speed, abs(y_diff))
+                sign = (y_diff > 0) - (y_diff < 0)
+                self.center_y += speed * sign
+                direction = ('y', y_diff)
 
         return direction
         

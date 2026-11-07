@@ -83,19 +83,8 @@ class GamePhysics:
             pacman, self.pacman_walls
         )
 
-    def setup_ghost_engines(self, ghost_list, wall_list):
-        # one engine for each of the ghosts
-        self.ghost_engines = [
-            arcade.PhysicsEngineSimple(ghost, wall_list)
-            for ghost in ghost_list
-        ]
-
     def update_pacman(self):
         self.pacman_engine.update()
-
-    def update_ghosts(self):
-        for engine in self.ghost_engines:
-            engine.update()
 
 
 class GameObjects:
@@ -165,12 +154,12 @@ class GameView(arcade.View):
         self.objects.dot_count(self.board)
 
         self.create_pacman()
-        self.create_ghosts()
+        self.create_ghosts(jail_center=level.find_jail_center(), board_rows=level.rows, board_cols=level.cols)
 
     def create_pacman(self):
         # coords for where to spawn pacman, right below the ghost prison or whatever
         spawn_x = 250
-        spawn_y = 258
+        spawn_y = 400
 
         self.pacman = Pacman(spawn_x, spawn_y)
         self.sprites.append(self.pacman)
@@ -180,26 +169,30 @@ class GameView(arcade.View):
             self.pacman, self.board.wall_list, self.board.ghost_wall_list
         )
 
-    def create_ghosts(self):
+    def create_ghosts(self, jail_center, board_cols, board_rows):
 
-        barrier_list = arcade.AStarBarrierList(
-            moving_sprite = self.pacman,
-            blocking_sprites = self.board.wall_list,
-            grid_size = TILE_SIZE,
-            left = MARGIN,
-            right = MARGIN + BOARD_WIDTH,
-            bottom = MARGIN,
-            top = MARGIN + BOARD_HEIGHT,
-        )
 
         self.ghost_list = arcade.SpriteList()
 
         self.ghost_list.extend([
-                Inky(barrier_list),
-                #Blinky(barrier_list),
-                Pinky(barrier_list),
-                Clyde(barrier_list),
+                Blinky(jail_center),
+                Inky(jail_center, board_cols=board_cols, board_rows=board_rows),
+                Pinky(jail_center, board_cols=board_cols, board_rows=board_rows),
+                Clyde(jail_center, board_cols=board_cols, board_rows=board_rows),
             ])
+
+        barrier_list = arcade.AStarBarrierList(
+                moving_sprite = self.ghost_list[0],
+                blocking_sprites = self.board.wall_list,
+                grid_size = TILE_SIZE,
+                left = 0,
+                right = board_cols * TILE_SIZE,
+                bottom = 0,
+                top = board_rows * TILE_SIZE,
+            )
+
+        for ghost in self.ghost_list:
+            ghost.barrier_list = barrier_list
 
     def reset(self):
         """Reset the game to the initial state."""
@@ -258,7 +251,6 @@ class GameView(arcade.View):
 
         self.sprites.update(delta_time)
         self.physics.update_pacman()
-        self.physics.update_ghosts()
 
         # Check collision after movement
         hit_ghosts = arcade.check_for_collision_with_list(
