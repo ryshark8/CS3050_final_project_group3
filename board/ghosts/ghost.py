@@ -127,13 +127,14 @@ class Ghost(arcade.Sprite):
         self.center_y += speed * sign
 
         # to help avoid not having a path once chasing starts
-        if self.path == None and self.elapsed_time >= self.jail_time:
+        if self.path == None and self.elapsed_time >= self.jail_time // 2:
             self.path = arcade.astar_calculate_path(
                 start_point=self.position,
                 end_point=pacman_pos,
                 astar_barrier_list=self.barrier_list,
                 diagonal_movement=False,
             ) 
+
         
         return ('y', distance)
 
@@ -176,7 +177,7 @@ class Ghost(arcade.Sprite):
         #     self.move_timer = 0
         #     self.new_path = True
 
-        if self.move_timer >= self.CHASE_TIME_ITER or self.position == self.path[-1]:
+        if self.move_timer >= self.CHASE_TIME_ITER or (self.path and self.position == self.path[-1]):
             self.move_timer = 0
             self.new_path = True
 
