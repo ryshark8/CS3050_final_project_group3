@@ -221,8 +221,14 @@ class Pacman(arcade.Sprite):
                                 if self.texture is self.open_texture
                                 else self.open_texture)
 
+        # wrap through the side tunnel
+        if self.center_x < -RADIUS:
+            self.center_x = WINDOW_WIDTH + RADIUS
+        elif self.center_x > WINDOW_WIDTH + RADIUS:
+            self.center_x = -RADIUS
+        self.center_y = max(RADIUS, min(WINDOW_HEIGHT - RADIUS, self.center_y))
+
     def on_key_press(self, key, modifiers):
         """ handle keyboard events """
         if key in KEY_TO_DIR:
              self.next_direction = KEY_TO_DIR[key]
-
