@@ -30,6 +30,7 @@ class Level():
             print("Rows:", len(maze))
             print("Columns:", len(maze[0]))
 
+# ---------------------- Ross edit ---------------------------
     # Convert grid coordinates to screen coordinates
     def cell_center(self, row, col):
         # Find horizontal center of tile
@@ -38,16 +39,27 @@ class Level():
         y = (self.rows - row) * tile_size
         return x, y
 
+    def find_tile(self, char):
+        """ Returns the screen (x, y) coordinates for a specific char in the maze"""
+        for row, line in enumerate(self.maze):
+            col = line.find(char)
+            if col != -1:
+                return self.cell_center(row, col)
+        return None
+
     def find_jail_center(self):
-        jail_center = None
+        return self.find_tile("*")
 
-        for row in range(len(self.maze)):
-            for col in range(len(self.maze[row])):
-                tile = self.maze[row][col]
-
-                if tile == "*":
-                    jail_center = (row * TILE_SIZE, (col * TILE_SIZE))
-                    
-        # jail_center = (self.board_height/2, self.board_width)
-
-        return jail_center
+    # def find_jail_center(self):
+    #     jail_center = None
+    #
+    #     for row in range(len(self.maze)):
+    #         for col in range(len(self.maze[row])):
+    #             tile = self.maze[row][col]
+    #
+    #             if tile == "*":
+    #                 jail_center = (row * TILE_SIZE, (col * TILE_SIZE))
+    #
+    #     # jail_center = (self.board_height/2, self.board_width)
+    #
+    #     return jail_center

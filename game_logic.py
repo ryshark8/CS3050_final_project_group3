@@ -14,7 +14,7 @@ import arcade
 # some file imports
 from board import pacman_board
 from board.levels.level import Level
-from board.levels import level1_board, level2_board
+from board.levels import level1_board, level2_board, level
 from board.dots_and_fruits.fruits import Fruit, fruit_for_level, LEVEL_FRUIT
 
 from board.ghosts.blinky import Blinky
@@ -74,7 +74,16 @@ class GamePhysics:
 
     def pacman_physics(self, pacman, wall_list, ghost_wall_list):
 
-        self.pacman_walls = arcade.SpriteList()
+        # was this:
+            # self.pacman_walls = arcade.SpriteList()
+        # basically what I learned is that this is bad
+        # it copies all of the walls into a plain list
+        # then when we do a collision check we have to loop over
+        # all of the walls which is about 1500, eeek
+        # my hope is that this fixes it
+        # commenting because we might need to do the same thing for ghosts
+
+        self.pacman_walls = arcade.SpriteList(use_spatial_hash=True, spatial_hash_cell_size=32)
 
         self.pacman_walls.extend(wall_list)
         self.pacman_walls.extend(ghost_wall_list)
@@ -100,12 +109,11 @@ class GameObjects:
         self.dot_list = board.dot_list
         self.num_dots = len(self.dot_list)
 
-    def spawn_fruit(self, current_level):
-        # self.fruit_list = arcade.SpriteList()
+    def spawn_fruit(self, current_level, position):
 
         if len(self.fruit_list) == 0:  # only one at a time
             kind = fruit_for_level(current_level)
-            self.fruit_list.append(Fruit(kind, 265, 247))
+            self.fruit_list.append(Fruit(kind, *position))
 
             if DEBUG:
                 print(f"Spawned: {kind}")
@@ -154,10 +162,15 @@ class GameView(arcade.View):
         self.create_pacman()
         self.create_ghosts(jail_center=level.find_jail_center(), board_rows=level.rows, board_cols=level.cols)
 
+    def get_spawn_point(self):
+        """ Finds the open corridor just below the jail center """
+        jail_x, jail_y = self.board.level.find_jail_center()
+        return jail_x, jail_y - 7 * TILE_SIZE
+
     def create_pacman(self):
-        # coords for where to spawn pacman, right below the ghost prison or whatever
-        spawn_x = 250
-        spawn_y = 400
+        # calculated spawn coords to replace the hardcoded ones before
+        # turned this into a helper so I can use in fruits too
+        spawn_x, spawn_y = self.get_spawn_point()
 
         self.pacman = Pacman(spawn_x, spawn_y)
         self.sprites.append(self.pacman)
@@ -198,7 +211,7 @@ class GameView(arcade.View):
         # Do needed changes to restart the game here if you want to support that
 
     def spawn_fruit(self):
-        self.objects.spawn_fruit(self.state.current_level)
+        self.objects.spawn_fruit(self.state.current_level, self.get_spawn_point())
 
     # handle what happens when ghost and pacman collide
     def handle_ghost_collision(self, ghost_list):

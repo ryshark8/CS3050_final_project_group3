@@ -9,7 +9,7 @@ from config import *
 IMAGE_DIR = Path(__file__).parent / "../../images/fruits/"
 
 # how long the fruit will stay on the board
-FRUIT_LIFETIME = 10
+FRUIT_LIFETIME = 20
 
 # How many points each of the fruits is worth
 # I only have cherry and dk what the other fruits are (sorry)

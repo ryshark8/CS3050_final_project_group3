@@ -3,7 +3,9 @@ A file for keeping global constants
 """
 
 # window constants
-WINDOW_WIDTH = 517
+# ------ ross edit -----
+# was 517 switched to 486 to center it
+WINDOW_WIDTH = 486
 WINDOW_HEIGHT = 653
 WINDOW_TITLE = "Pac-Man"
 

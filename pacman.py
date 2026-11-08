@@ -58,14 +58,16 @@ class Pacman(arcade.Sprite):
 
         super().__init__(self.open_texture, center_x=x, center_y=y)
 
+        self.maze_width = WINDOW_WIDTH
+
         # some game specific attributes
         self.lives = 3
         self.is_dying = False
         self.is_dead = False
 
         # coords for where to spawn pacman, right below the ghost prison or whatever
-        self.spawn_x = 250
-        self.spawn_y = 258
+        self.spawn_x = x
+        self.spawn_y = y
 
         # death attributes
         self.death_frame = 0
@@ -204,8 +206,7 @@ class Pacman(arcade.Sprite):
             self.change_x = 0
             self.change_y = 0
 
-        # clamp to window (after movement is applied elsewhere, or do it here)
-        self.center_x = max(RADIUS, min(WINDOW_WIDTH - RADIUS, self.center_x))
+        # Clamp the Y, used to clamp the x, but he couldn't get through the tunnel
         self.center_y = max(RADIUS, min(WINDOW_HEIGHT - RADIUS, self.center_y))
 
         # mouth animation
@@ -221,10 +222,9 @@ class Pacman(arcade.Sprite):
 
         # wrap through the side tunnel
         if self.center_x < -RADIUS:
-            self.center_x = WINDOW_WIDTH + RADIUS
-        elif self.center_x > WINDOW_WIDTH + RADIUS:
+            self.center_x = self.maze_width + RADIUS
+        elif self.center_x > self.maze_width + RADIUS:
             self.center_x = -RADIUS
-        self.center_y = max(RADIUS, min(WINDOW_HEIGHT - RADIUS, self.center_y))
 
     def on_key_press(self, key, modifiers):
         """ handle keyboard events """
