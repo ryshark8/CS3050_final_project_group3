@@ -29,21 +29,25 @@ class StartView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        image = arcade.LBWH(self.window.width / 10, self.window.height / 2, 4 * self.window.width / 5, 200)
+        image = arcade.LBWH(
+            self.window.width / 10,
+            self.window.height / 2,
+            4 * self.window.width / 5,
+            200,
+        )
 
         arcade.draw_texture_rect(self.background, image)
 
         self.text.draw()
 
-    def on_key_press(self, symbol, modifers):
+    def on_key_press(self, symbol, modifiers):
 
         if symbol == arcade.key.ENTER:
             self.start_game()
             print("enter hit")
 
-    
     def on_update(self, delta_time):
-        
+
         if self.elapsed_time > 1:
 
             if self.text.color == arcade.color.YELLOW:
@@ -93,7 +97,7 @@ class GameOverView(arcade.View):
 
     def on_update(self, delta_time):
         if self.elapsed_time > 1:
-        
+
             if self.instructions.color == arcade.color.YELLOW:
                 self.instructions.color = arcade.color.DARK_YELLOW
 
@@ -101,11 +105,10 @@ class GameOverView(arcade.View):
                 self.instructions.color = arcade.color.YELLOW
 
             self.elapsed_time = 0
-    
-        self.elapsed_time += delta_time
-        
 
-    def on_key_press(self, symbol, modifers):
+        self.elapsed_time += delta_time
+
+    def on_key_press(self, symbol, modifiers):
 
         if symbol == arcade.key.ENTER:
             self.start_game()
