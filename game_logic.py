@@ -26,19 +26,23 @@ from pacman import Pacman
 
 from board.screens import StartView, GameOverView
 
-from config import (BOARD_WIDTH, BOARD_HEIGHT, TILE_SIZE,
-                    MARGIN, WINDOW_WIDTH, WINDOW_HEIGHT,
-                    WINDOW_TITLE, DEBUG)
+from config import (
+    BOARD_WIDTH,
+    BOARD_HEIGHT,
+    TILE_SIZE,
+    MARGIN,
+    WINDOW_WIDTH,
+    WINDOW_HEIGHT,
+    WINDOW_TITLE,
+    DEBUG,
+)
 
 
 class GameState:
-    """ Initialize game state variables """
+    """Initialize game state variables"""
 
     def __init__(self):
-        self.levels = [
-            Level(level1_board.maze),
-            Level(level2_board.maze)
-        ]
+        self.levels = [Level(level1_board.maze), Level(level2_board.maze)]
         self.current_level = 0
         self.current_score = 0
         self.dots_eaten = 0
@@ -75,7 +79,7 @@ class GamePhysics:
     def pacman_physics(self, pacman, wall_list, ghost_wall_list):
 
         # was this:
-            # self.pacman_walls = arcade.SpriteList()
+        # self.pacman_walls = arcade.SpriteList()
         # basically what I learned is that this is bad
         # it copies all of the walls into a plain list
         # then when we do a collision check we have to loop over
@@ -83,16 +87,16 @@ class GamePhysics:
         # my hope is that this fixes it
         # commenting because we might need to do the same thing for ghosts
 
-        self.pacman_walls = arcade.SpriteList(use_spatial_hash=True, spatial_hash_cell_size=32)
+        self.pacman_walls = arcade.SpriteList(
+            use_spatial_hash=True, spatial_hash_cell_size=32
+        )
 
         self.pacman_walls.extend(wall_list)
         self.pacman_walls.extend(ghost_wall_list)
 
         pacman.walls = self.pacman_walls
 
-        self.pacman_engine = arcade.PhysicsEngineSimple(
-            pacman, self.pacman_walls
-        )
+        self.pacman_engine = arcade.PhysicsEngineSimple(pacman, self.pacman_walls)
 
     def update_pacman(self):
         self.pacman_engine.update()
@@ -117,6 +121,7 @@ class GameObjects:
 
             if DEBUG:
                 print(f"Spawned: {kind}")
+
 
 class GameView(arcade.View):
     """
@@ -160,10 +165,14 @@ class GameView(arcade.View):
         self.objects.dot_count(self.board)
 
         self.create_pacman()
-        self.create_ghosts(jail_center=level.find_jail_center(), board_rows=level.rows, board_cols=level.cols)
+        self.create_ghosts(
+            jail_center=level.find_jail_center(),
+            board_rows=level.rows,
+            board_cols=level.cols,
+        )
 
     def get_spawn_point(self):
-        """ Finds the open corridor just below the jail center """
+        """Finds the open corridor just below the jail center"""
         jail_x, jail_y = self.board.level.find_jail_center()
         return jail_x, jail_y - 7 * TILE_SIZE
 
@@ -182,25 +191,26 @@ class GameView(arcade.View):
 
     def create_ghosts(self, jail_center, board_cols, board_rows):
 
-
         self.ghost_list = arcade.SpriteList()
 
-        self.ghost_list.extend([
+        self.ghost_list.extend(
+            [
                 Blinky(jail_center),
                 Inky(jail_center, board_cols=board_cols, board_rows=board_rows),
                 Pinky(jail_center, board_cols=board_cols, board_rows=board_rows),
                 Clyde(jail_center, board_cols=board_cols, board_rows=board_rows),
-            ])
+            ]
+        )
 
         barrier_list = arcade.AStarBarrierList(
-                moving_sprite = self.ghost_list[0],
-                blocking_sprites = self.board.wall_list,
-                grid_size = TILE_SIZE,
-                left = 0,
-                right = board_cols * TILE_SIZE,
-                bottom = 0,
-                top = board_rows * TILE_SIZE,
-            )
+            moving_sprite=self.ghost_list[0],
+            blocking_sprites=self.board.wall_list,
+            grid_size=TILE_SIZE,
+            left=0,
+            right=board_cols * TILE_SIZE,
+            bottom=0,
+            top=board_rows * TILE_SIZE,
+        )
 
         for ghost in self.ghost_list:
             ghost.barrier_list = barrier_list
@@ -217,10 +227,10 @@ class GameView(arcade.View):
     def handle_ghost_collision(self, ghost_list):
         for ghost in ghost_list:
             # TODO: this is where the ghost eaten logic should go!
-            if ghost: # is frightened
+            if ghost:  # is frightened
                 # respawn the ghost
                 # add to the score
-                self.pacman.loose_life() # putting this here to test it
+                self.pacman.loose_life()  # putting this here to test it
             else:
                 pass
 
@@ -232,8 +242,10 @@ class GameView(arcade.View):
             dot.remove_from_sprite_lists()
 
             if DEBUG:
-                print(f"Score: {self.state.current_score}, "
-                      f"Dots eaten: {self.state.dots_eaten}")
+                print(
+                    f"Score: {self.state.current_score}, "
+                    f"Dots eaten: {self.state.dots_eaten}"
+                )
 
             # (70, 160) here is the threshold for spawning fruits
             # so when you eat 70 one spawns and when you eat 157 one spawns
@@ -256,18 +268,13 @@ class GameView(arcade.View):
         self.board.current_score_number.text = str(self.state.current_score)
 
     def update_game(self, delta_time):
-        self.ghost_list.update(
-            delta_time = delta_time,
-            pacman_pos = self.pacman.position
-        )
+        self.ghost_list.update(delta_time=delta_time, pacman_pos=self.pacman.position)
 
         self.sprites.update(delta_time)
         self.physics.update_pacman()
 
         # Check collision after movement
-        hit_ghosts = arcade.check_for_collision_with_list(
-            self.pacman, self.ghost_list
-        )
+        hit_ghosts = arcade.check_for_collision_with_list(self.pacman, self.ghost_list)
 
         if hit_ghosts:
             self.handle_ghost_collision(hit_ghosts)
@@ -281,7 +288,7 @@ class GameView(arcade.View):
 
         self.objects.fruit_list.update(delta_time=delta_time)
 
-        self.objects.fruit_list.update(delta_time = delta_time)
+        self.objects.fruit_list.update(delta_time=delta_time)
 
         hit_fruits = arcade.check_for_collision_with_list(
             self.pacman, self.objects.fruit_list
@@ -297,7 +304,6 @@ class GameView(arcade.View):
                     f"Score: {self.state.current_score}, Dots eaten: {self.state.dots_eaten}"
                 )
 
-
     def on_draw(self):
         """
         Render the screen.
@@ -305,7 +311,6 @@ class GameView(arcade.View):
 
         # This command should happen before we start drawing. It will clear
         # the screen to the background color, and erase what we drew last frame.
-
 
         # Call draw() on all your sprite lists below
         self.clear()
@@ -357,21 +362,20 @@ class GameView(arcade.View):
 
     def display_start_screen(self, window):
         """display the start screen"""
-        start_view =  StartView(lambda:self.start_game(window))
+        start_view = StartView(lambda: self.start_game(window))
         window.show_view(start_view)
 
     def display_game_over(self, window):
         """display the game over screen"""
-        game_over = GameOverView(lambda:self.start_game(window))
+        game_over = GameOverView(lambda: self.start_game(window))
         window.show_view(game_over)
+
 
 def main():
     """Main function"""
 
     # Create a window class. This is what actually shows up on screen
-    window = arcade.Window(
-        WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE
-    )
+    window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 
     # Create and set up the GameView
     game = GameView()

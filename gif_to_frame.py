@@ -22,6 +22,3 @@ frameNum = 0
 for frame in ImageSequence.Iterator(gif):
     frame.save(f"images/{folder}/{fileLabel}_frame{frameNum}.png", "PNG")
     frameNum += 1
-
-
-

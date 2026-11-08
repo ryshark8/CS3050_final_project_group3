@@ -14,11 +14,13 @@ BOARD_WIDTH = 510
 BOARD_HEIGHT = 600
 BOARD_SIZE = BOARD_WIDTH * BOARD_HEIGHT
 
-#where the board is w/ respect to the window
+# where the board is w/ respect to the window
 DIFFERENCE_W = WINDOW_WIDTH - BOARD_WIDTH
 difference_h = WINDOW_HEIGHT - BOARD_HEIGHT
-BOARD_BOUNDARIES = ([DIFFERENCE_W // 2, WINDOW_WIDTH - (DIFFERENCE_W // 2)], 
-                    [difference_h // 2, WINDOW_HEIGHT - (difference_h // 2)])
+BOARD_BOUNDARIES = (
+    [DIFFERENCE_W // 2, WINDOW_WIDTH - (DIFFERENCE_W // 2)],
+    [difference_h // 2, WINDOW_HEIGHT - (difference_h // 2)],
+)
 
 # jail coordinates
 JAIL_CENTER = (253, 315)

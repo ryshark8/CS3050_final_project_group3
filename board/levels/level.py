@@ -15,12 +15,13 @@ high_score_position = HIGH_SCORE_POSITION
 margin = MARGIN
 header_height = HEADER_HEIGHT
 
-class Level():
+
+class Level:
     def __init__(self, maze):
         self.maze = maze
         self.rows = len(self.maze)
         self.cols = max(len(row) for row in self.maze)
-        self.maze = [row.ljust(self.cols)[:self.cols] for row in self.maze]
+        self.maze = [row.ljust(self.cols)[: self.cols] for row in self.maze]
         self.board_width = self.cols * tile_size + TILE_SIZE
         self.board_height = self.rows * tile_size
         self.screen_width = self.board_width
@@ -30,7 +31,7 @@ class Level():
             print("Rows:", len(maze))
             print("Columns:", len(maze[0]))
 
-# ---------------------- Ross edit ---------------------------
+    # ---------------------- Ross edit ---------------------------
     # Convert grid coordinates to screen coordinates
     def cell_center(self, row, col):
         # Find horizontal center of tile
@@ -40,7 +41,7 @@ class Level():
         return x, y
 
     def find_tile(self, char):
-        """ Returns the screen (x, y) coordinates for a specific char in the maze"""
+        """Returns the screen (x, y) coordinates for a specific char in the maze"""
         for row, line in enumerate(self.maze):
             col = line.find(char)
             if col != -1:

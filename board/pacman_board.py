@@ -17,7 +17,8 @@ high_score_position = HIGH_SCORE_POSITION
 margin = MARGIN
 header_height = HEADER_HEIGHT
 
-class PacmanBoard():
+
+class PacmanBoard:
     def __init__(self, level):
 
         self.level = level
@@ -36,8 +37,7 @@ class PacmanBoard():
         self.dots = Dot()
         self.dot_list = self.dots.create_dots(level)
 
-        self.wall_list, self.ghost_wall_list = build_walls(
-            maze, tile_size, cell_center)
+        self.wall_list, self.ghost_wall_list = build_walls(maze, tile_size, cell_center)
 
         # ---------- Ross Edit -----------------
         # this edit is accompanied by the edit on line 88 of this file
@@ -47,17 +47,23 @@ class PacmanBoard():
         # I did this in hopes that it speeds up the program
         self.wall_fill_list = arcade.SpriteList()
         for wall in self.wall_list:
-            self.wall_fill_list.append(arcade.SpriteSolidColor(
-                width=tile_size, height=tile_size, color=FILL_COLOR,
-                center_x=wall.center_x, center_y=wall.center_y))
+            self.wall_fill_list.append(
+                arcade.SpriteSolidColor(
+                    width=tile_size,
+                    height=tile_size,
+                    color=FILL_COLOR,
+                    center_x=wall.center_x,
+                    center_y=wall.center_y,
+                )
+            )
 
         self.high_score_label = arcade.Text(
             "HIGH SCORE",
             screen_width / 2,
             margin + board_height + label_position,
             arcade.color.WHITE,
-            font_size = label_size,
-            anchor_x = "center"
+            font_size=label_size,
+            anchor_x="center",
         )
 
         # Create the high-score number.
@@ -66,8 +72,8 @@ class PacmanBoard():
             screen_width / 2,
             margin + board_height + high_score_position,
             arcade.color.WHITE,
-            font_size = score_size,
-            anchor_x = "center"
+            font_size=score_size,
+            anchor_x="center",
         )
 
         self.current_score_label = arcade.Text(
@@ -75,8 +81,8 @@ class PacmanBoard():
             margin + score_position,
             margin + board_height + label_position,
             arcade.color.WHITE,
-            font_size = label_size,
-            anchor_x = "center"
+            font_size=label_size,
+            anchor_x="center",
         )
 
         # Create the current-score number on the left.
@@ -85,8 +91,8 @@ class PacmanBoard():
             margin + score_position,
             margin + board_height + high_score_position,
             arcade.color.WHITE,
-            font_size = score_size,
-            anchor_x = "center"
+            font_size=score_size,
+            anchor_x="center",
         )
 
     # ---------------- Ross Edit -------------------

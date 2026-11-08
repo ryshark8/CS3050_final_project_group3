@@ -1,6 +1,7 @@
 """
 Dot Sprites
 """
+
 import arcade
 
 from config import *
@@ -13,6 +14,7 @@ score_position = SCORE_POSITION
 high_score_position = HIGH_SCORE_POSITION
 margin = MARGIN
 header_height = HEADER_HEIGHT
+
 
 class Dot:
     def __init__(self):
@@ -28,7 +30,7 @@ class Dot:
                 if level.maze[row][col] == ".":
                     x, y = level.cell_center(row, col)
 
-                    dot_radius = max(3, int(tile_size/3))
+                    dot_radius = max(3, int(tile_size / 3))
 
                     dot = arcade.SpriteCircle(dot_radius, arcade.color.YELLOW)
                     dot.center_x = x

@@ -5,7 +5,6 @@ from board.ghosts.ghost import Ghost
 from config import TILE_SIZE
 
 
-
 class Inky(Ghost):
     """Class representing blue ghost"""
 

@@ -61,4 +61,3 @@ class Blinky(Ghost):
             self.new_path = True
 
         return direction
-

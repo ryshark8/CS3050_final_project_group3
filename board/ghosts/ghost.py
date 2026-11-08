@@ -6,7 +6,6 @@ import arcade
 from config import TILE_SIZE
 
 
-
 class Ghost(arcade.Sprite):
     """
     Parent class for each individual ghost sprite
@@ -27,6 +26,7 @@ class Ghost(arcade.Sprite):
 
     class Mode(Enum):
         """Defining different movement patterns"""
+
         JAIL = "jail"
         CHASE = "chase"
         SCATTER = "scatter"

@@ -21,20 +21,16 @@ FRUIT_POINTS = {
     "melon": 1000,
     "galaxian": 2000,
     "bell": 3000,
-    "key": 5000
+    "key": 5000,
 }
 
 # the sizes of each of the images, provided default does not look good
 DEFAULT_FRUIT_SIZE = 20
-FRUIT_SIZE = {
-    "galaxian": 25,
-    "bell": 18,
-    "key": 15
-}
+FRUIT_SIZE = {"galaxian": 25, "bell": 18, "key": 15}
 
 # which fruit appears on what level, in order
 LEVEL_FRUIT = [
-     "cherry",
+    "cherry",
     "strawberry",
     "orange",
     "apple",
@@ -44,8 +40,10 @@ LEVEL_FRUIT = [
     "key",
 ]
 
+
 def fruit_for_level(level):
     return LEVEL_FRUIT[min(level, len(LEVEL_FRUIT) - 1)]
+
 
 class Fruit(arcade.Sprite):
     def __init__(self, kind, x, y, size=None):
@@ -66,5 +64,6 @@ class Fruit(arcade.Sprite):
         self.time_left -= delta_time
         if self.time_left <= 0:
             # get rid of it if it has not been eaten in FRUIT_LIFETIME
-            if DEBUG: print(f"Fruit timeout destroying {self.kind}")
+            if DEBUG:
+                print(f"Fruit timeout destroying {self.kind}")
             self.remove_from_sprite_lists()
