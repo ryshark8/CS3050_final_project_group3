@@ -1,13 +1,14 @@
-import arcade
+"""Orange ghost"""
+
 from pathlib import Path
 from board.ghosts.ghost import Ghost
-from config import *
+
 
 class Clyde(Ghost):
+    """class for orange ghost"""
 
     JAIL_TIME = 15
 
-    #TODO: create a dictionary of attributes based on color of the ghost
     def __init__(self, jail_center, board_rows, board_cols):
 
         super().__init__(jail_center, sprite_files=Path("images/ghosts/clyde"))
@@ -17,7 +18,6 @@ class Clyde(Ghost):
         self.jail_time = self.JAIL_TIME
 
         self.destination = [self.center_x, self.jail_center[1] - 12]
-
 
     # def chase(self, pacman_pos):
 
@@ -51,6 +51,5 @@ class Clyde(Ghost):
     #         sign = (y_diff > 0) - (y_diff < 0)
     #         self.center_y += speed * sign
     #         direction = ('y', y_diff)
-
 
     #     return direction

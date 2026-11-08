@@ -14,10 +14,7 @@ def main():
     # Create and set up the GameView
     game = GameView()
 
-    game.setup()
-
-    # Show GameView on screen
-    window.show_view(game)
+    game.display_start_screen(window)
 
     # Start the arcade game loop
     arcade.run()

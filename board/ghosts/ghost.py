@@ -1,14 +1,22 @@
-import arcade
+"""Basic ghost functionality"""
+
 import random
-from config import *
 from enum import Enum
+import arcade
+from config import TILE_SIZE
+
+
 
 class Ghost(arcade.Sprite):
+    """
+    Parent class for each individual ghost sprite
+    """
 
     FRAME_DURATION = 0.5
 
-    #currently hardcoding this but it may be a good idea going forward to get this via parameter from Level because it will change
-    CHASE_TIME_ITER = 4 # time between path recalculations when chasing pacman
+    # currently hardcoding this but it may be a good idea going forward to get this via parameter
+    # from Level because it will change
+    CHASE_TIME_ITER = 4  # time between path recalculations when chasing pacman
     CHASE_TIME_TOTAL = 20
     SCATTER = [5, 5, 7, 7]
 
@@ -16,7 +24,9 @@ class Ghost(arcade.Sprite):
     Mode represents state of the ghosts in the game which are triggered by different events.
     Each mode has an associated movement pattern and/or texture
     """
+
     class Mode(Enum):
+        """Defining different movement patterns"""
         JAIL = "jail"
         CHASE = "chase"
         SCATTER = "scatter"
@@ -28,7 +38,7 @@ class Ghost(arcade.Sprite):
         super().__init__()
 
         frames = [arcade.load_texture(str(frame)) for frame in sprite_files.iterdir()]
-        
+
         self.frames = {
             "down": frames[:2],
             "left": frames[2:4],
@@ -56,29 +66,34 @@ class Ghost(arcade.Sprite):
         self.destination = None
         self.path = None
         self.path_index = 0
-        self.assigned_corner = None
+        self.assigned_corner = {}
         self.new_path = True
-
+        self.chase_timer = 0
 
     def update_animation(self, direction):
-
+        """
+        updating the ghost's animation
+        """
         # make sure eyes are correct
-        if direction[0] == 'x':
+        if direction[0] == "x":
             if direction[1] > 0:
-                self.textures = self.frames['right']
+                self.textures = self.frames["right"]
             else:
-                self.textures = self.frames['left']
+                self.textures = self.frames["left"]
 
         else:
             if direction[1] > 0:
-                self.textures = self.frames['up']
+                self.textures = self.frames["up"]
             else:
-                self.textures = self.frames['down']
+                self.textures = self.frames["down"]
 
         self.cur_texture_index = (self.cur_texture_index + 1) % len(self.textures)
         self.texture = self.textures[self.cur_texture_index]
 
     def update(self, delta_time, pacman_pos):
+        """
+        updating ghost position and animation
+        """
         # movement logic
         match self.mode.value:
 
@@ -87,9 +102,9 @@ class Ghost(arcade.Sprite):
                 if self.elapsed_time >= self.jail_time:
                     self.mode = self.Mode.CHASE
                     return
-                
-                direction = self.jail(self, pacman_pos)
-                
+
+                direction = self.jail(pacman_pos)
+
             case "chase":
                 direction = self.chase(pacman_pos)
 
@@ -100,8 +115,8 @@ class Ghost(arcade.Sprite):
                 pass
             case "scared":
                 pass
-        
-        #update the animation
+
+        # update the animation
         if self.animation_timer >= self.FRAME_DURATION:
             self.update_animation(direction=direction)
             self.animation_timer = 0
@@ -110,11 +125,12 @@ class Ghost(arcade.Sprite):
         self.elapsed_time += delta_time
         self.animation_timer += delta_time
 
-    @staticmethod
     def jail(self, pacman_pos):
-
+        """
+        dictates movement for when ghosts are in jail
+        """
         if self.center_y == self.destination[1]:
-            #go down
+            # go down
             if self.center_y > self.jail_center[1]:
                 self.destination[1] = self.jail_center[1] - 6
 
@@ -127,38 +143,41 @@ class Ghost(arcade.Sprite):
         self.center_y += speed * sign
 
         # to help avoid not having a path once chasing starts
-        if self.path == None and self.elapsed_time >= self.jail_time // 2:
+        if self.path is None and self.elapsed_time >= self.jail_time // 2:
             self.path = arcade.astar_calculate_path(
                 start_point=self.position,
                 end_point=pacman_pos,
                 astar_barrier_list=self.barrier_list,
                 diagonal_movement=False,
-            ) 
+            )
 
-        
-        return ('y', distance)
+        return ("y", distance)
 
     def chase(self, pacman_pos):
-        #check to see if a new path is needed
+        """
+        for pathfinding using pacman's position
+        NOTE: eventually, this should be specific to each ghost
+        """
+        # check to see if a new path is needed
         if self.new_path:
             path = arcade.astar_calculate_path(
                 start_point=self.position,
                 end_point=pacman_pos,
                 astar_barrier_list=self.barrier_list,
                 diagonal_movement=False,
-            ) 
+            )
 
-            if  path:
+            if path:
                 self.path = path
                 self.path_index = 0
                 self.destination = self.path[self.path_index]
 
             self.new_path = False
-        
-        #check to see if we've reached the next point on the path
+
+        # check to see if we've reached the next point on the path
         if self.position == self.destination:
 
-            #if we've reached the end of the current path before getting a new one, reverse
+            # if we've reached the end of the current path before getting a new one, reverse
             if self.path_index == len(self.path) - 1:
                 self.path_index -= 1
                 self.new_path = True
@@ -177,21 +196,29 @@ class Ghost(arcade.Sprite):
         #     self.move_timer = 0
         #     self.new_path = True
 
-        if self.move_timer >= self.CHASE_TIME_ITER or (self.path and self.position == self.path[-1]):
+        if self.move_timer >= self.CHASE_TIME_ITER or (
+            self.path and self.position == self.path[-1]
+        ):
             self.move_timer = 0
             self.new_path = True
-
 
         return direction
 
     def scatter(self):
-
+        """
+        function that dictates movement for "scatter mode" i.e when ghosts are returning to
+        their own corners briefly in between chase sessions
+        """
         if self.new_path:
-            x = random.randint(self.assigned_corner["left"], self.assigned_corner["right"])
-            y = random.randint(self.assigned_corner["bottom"], self.assigned_corner["top"])
+            x = random.randint(
+                self.assigned_corner["left"], self.assigned_corner["right"]
+            )
+            y = random.randint(
+                self.assigned_corner["bottom"], self.assigned_corner["top"]
+            )
             self.path = arcade.astar_calculate_path(
                 start_point=self.position,
-                end_point= (x, y),
+                end_point=(x, y),
                 astar_barrier_list=self.barrier_list,
                 diagonal_movement=False,
             )
@@ -201,14 +228,14 @@ class Ghost(arcade.Sprite):
 
         self.destination = self.path[self.path_index]
 
-        #check to see if we've reached the next point on the path
+        # check to see if we've reached the next point on the path
         if self.position == self.destination:
             self.path_index += 1
             self.destination = self.path[self.path_index]
 
         direction = self.move()
 
-        #check to see if we should go back to chasing yet
+        # check to see if we should go back to chasing yet
         if self.move_timer >= self.SCATTER[1]:
             self.mode = self.Mode.CHASE
             self.move_timer = 0
@@ -216,40 +243,37 @@ class Ghost(arcade.Sprite):
 
         elif self.position == self.path[-1]:
             self.new_path = True
-    
+
         return direction
 
     def scared(self):
-        pass
+        """movement for scared ghosts"""
+        return
 
     def eaten(self):
-        pass
+        """movement for eaten ghosts"""
+        return
 
-    """
-    General orthogonal movement function
-    """
     def move(self):
+        """General orthogonal movement function"""
 
-        direction = ('x', 0)
-        if self.destination != None:
-            
+        direction = ("x", 0)
+        if self.destination is not None:
+
             x_diff = self.destination[0] - self.center_x
             y_diff = self.destination[1] - self.center_y
 
-
-            #can only move orthogonally
+            # can only move orthogonally
             if x_diff:
                 speed = min(self.speed, abs(x_diff))
                 sign = (x_diff > 0) - (x_diff < 0)
                 self.center_x += speed * sign
-                direction = ('x', x_diff)
+                direction = ("x", x_diff)
 
             elif y_diff:
                 speed = min(self.speed, abs(y_diff))
                 sign = (y_diff > 0) - (y_diff < 0)
                 self.center_y += speed * sign
-                direction = ('y', y_diff)
+                direction = ("y", y_diff)
 
         return direction
-        
-        

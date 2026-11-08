@@ -24,6 +24,8 @@ from board.ghosts.clyde import Clyde
 
 from pacman import Pacman
 
+from board.screens import StartView, GameOverView
+
 from config import (BOARD_WIDTH, BOARD_HEIGHT, TILE_SIZE,
                     MARGIN, WINDOW_WIDTH, WINDOW_HEIGHT,
                     WINDOW_TITLE, DEBUG)
@@ -111,10 +113,6 @@ class GameObjects:
 class GameView(arcade.View):
     """
     Main application class.
-
-    NOTE: Go ahead and delete the methods you don't need.
-    If you do need a method, delete the 'pass' and replace it
-    with your own code. Don't leave 'pass' in this program.
     """
 
     def __init__(self):
@@ -320,7 +318,7 @@ class GameView(arcade.View):
 
                 if self.pacman.lives <= 0:
                     if DEBUG:
-                        print("Game over")  # TODO: replace with a game over screen
+                        self.display_game_over(self.window)
             return  # freeze ghosts while dying
 
         self.update_game(delta_time)
@@ -338,6 +336,21 @@ class GameView(arcade.View):
         # move pacman
         self.pacman.on_key_press(symbol, modifiers)
 
+    def start_game(self, window):
+        """start a new game"""
+        game = GameView()
+        game.setup()
+        window.show_view(game)
+
+    def display_start_screen(self, window):
+        """display the start screen"""
+        start_view =  StartView(lambda:self.start_game(window))
+        window.show_view(start_view)
+
+    def display_game_over(self, window):
+        """display the game over screen"""
+        game_over = GameOverView(lambda:self.start_game(window))
+        window.show_view(game_over)
 
 def main():
     """Main function"""
