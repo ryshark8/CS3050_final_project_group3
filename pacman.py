@@ -2,8 +2,6 @@
 Pac-Man sprite
 """
 
-import arcade
-from config import *
 from pathlib import Path
 import arcade
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, DEBUG
