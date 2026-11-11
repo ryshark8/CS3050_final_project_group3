@@ -42,7 +42,7 @@ class GameState:
     """Initialize game state variables"""
 
     def __init__(self):
-        self.levels = [Level(level1_board.maze), Level(level2_board.maze)]
+        self.levels = [Level(level1_board.maze, "level One"), Level(level2_board.maze, "Level Two")]
         self.current_level = 0
         self.current_score = 0
         self.dots_eaten = 0
@@ -335,8 +335,9 @@ class GameView(arcade.View):
                 self.pacman.kill_pacman()
 
                 if self.pacman.lives <= 0:
+                    self.display_game_over(self.window)
                     if DEBUG:
-                        self.display_game_over(self.window)
+                        print("GAME OVER")
             return  # freeze ghosts while dying
 
         self.update_game(delta_time)

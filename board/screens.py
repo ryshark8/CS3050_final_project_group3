@@ -3,7 +3,7 @@ Start and end screens for the game
 """
 
 import arcade
-
+from config import DEBUG
 
 class StartView(arcade.View):
     """
@@ -25,8 +25,6 @@ class StartView(arcade.View):
             anchor_x="center",
         )
 
-        print(self.window.height / 2)
-
     def on_draw(self):
         self.clear()
         image = arcade.LBWH(
@@ -44,7 +42,8 @@ class StartView(arcade.View):
 
         if symbol == arcade.key.ENTER:
             self.start_game()
-            print("enter hit")
+            if DEBUG:
+                print("enter hit")
 
     def on_update(self, delta_time):
 
@@ -112,4 +111,5 @@ class GameOverView(arcade.View):
 
         if symbol == arcade.key.ENTER:
             self.start_game()
-            print("enter hit")
+            if DEBUG:
+                print("enter hit")

@@ -154,55 +154,23 @@ class Ghost(arcade.Sprite):
         return ("y", distance)
 
     def chase(self, pacman_pos):
-        """
-        for pathfinding using pacman's position
-        NOTE: eventually, this should be specific to each ghost
-        """
-        # check to see if a new path is needed
-        if self.new_path:
+        on_node = self.destination is None or tuple(self.position) == tuple(self.destination)
+
+        if on_node:
+            target = (round(pacman_pos[0] / TILE_SIZE) * TILE_SIZE,
+                      round(pacman_pos[1] / TILE_SIZE) * TILE_SIZE)
+
             path = arcade.astar_calculate_path(
                 start_point=self.position,
-                end_point=pacman_pos,
+                end_point=target,   # make the target NOT pacmans position
                 astar_barrier_list=self.barrier_list,
                 diagonal_movement=False,
             )
-
             if path:
-                self.path = path
-                self.path_index = 0
-                self.destination = self.path[self.path_index]
+                standing = tuple(path[0]) == tuple(self.position)
+                self.destination = path[1] if standing and len(path) > 1 else path[0]
 
-            self.new_path = False
-
-        # check to see if we've reached the next point on the path
-        if self.position == self.destination:
-
-            # if we've reached the end of the current path before getting a new one, reverse
-            if self.path_index == len(self.path) - 1:
-                self.path_index -= 1
-                self.new_path = True
-                self.move_timer = 0
-
-            else:
-                self.path_index += 1
-
-            self.destination = self.path[self.path_index]
-
-        direction = self.move()
-
-        # check for needing a new path next time through or moving to scatter
-        # if self.move_timer >= self.CHASE_TIME_TOTAL:
-        #     self.mode = self.Mode.SCATTER
-        #     self.move_timer = 0
-        #     self.new_path = True
-
-        if self.move_timer >= self.CHASE_TIME_ITER or (
-            self.path and self.position == self.path[-1]
-        ):
-            self.move_timer = 0
-            self.new_path = True
-
-        return direction
+        return self.move()
 
     def scatter(self):
         """

@@ -17,7 +17,7 @@ header_height = HEADER_HEIGHT
 
 
 class Level:
-    def __init__(self, maze):
+    def __init__(self, maze, name="level"):
         self.maze = maze
         self.rows = len(self.maze)
         self.cols = max(len(row) for row in self.maze)
@@ -26,10 +26,10 @@ class Level:
         self.board_height = self.rows * tile_size
         self.screen_width = self.board_width
         self.screen_height = self.board_height + header_height + 2 * margin
-        print(self.screen_width, self.screen_height)
+
         if DEBUG:
-            print("Rows:", len(maze))
-            print("Columns:", len(maze[0]))
+            print(f"[{name}] Rows: {self.rows}, Columns: {self.cols}, "
+                  f"Screen: {self.screen_width}x{self.screen_height}")
 
     # ---------------------- Ross edit ---------------------------
     # Convert grid coordinates to screen coordinates
