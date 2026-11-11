@@ -28,7 +28,7 @@ class MegaDot:
 
         for row in range(level.rows):
             for col in range(level.cols):
-                if level.maze[row][col] == ".":
+                if level.maze[row][col] == "@":
                     x, y = level.cell_center(row, col)
 
                     dot_radius = max(6, int(tile_size / 3))
