@@ -46,10 +46,12 @@ class GameState:
         self.current_level = 0
         self.current_score = 0
         self.dots_eaten = 0
+        self.mega_dots_eaten = 0
 
     # Initialize for each level
     def initialize_level(self):
         self.dots_eaten = 0
+        self.mega_dots_eaten = 0
         self.current_score = 0
 
     # Update current score
@@ -58,6 +60,9 @@ class GameState:
 
     def collect_dot(self):
         self.dots_eaten += 1
+
+    def collect_mega_dot(self):
+        self.mega_dots_eaten += 1
 
     def advance_level(self):
         if self.current_level < len(self.levels) - 1:
@@ -107,11 +112,13 @@ class GameObjects:
     def __init__(self):
         self.fruit_list = None
         self.dot_list = None
+        self.mega_dot_list = None
         self.num_dots = None
 
     def dot_count(self, board):
         self.dot_list = board.dot_list
-        self.num_dots = len(self.dot_list)
+        self.mega_dot_list = board.mega_dot_list
+        self.num_dots = len(self.dot_list) + len(self.mega_dot_list)
 
     def spawn_fruit(self, current_level, position):
 
@@ -158,9 +165,11 @@ class GameView(arcade.View):
         self.sprites = arcade.SpriteList()
         # Fruits
         self.objects.dot_list = arcade.SpriteList()
+        self.objects.mega_dot_list = arcade.SpriteList()
         self.objects.fruit_list = arcade.SpriteList()
 
         self.state.dots_eaten = 0
+        self.state.mega_dots_eaten = 0
         self.next_fruit_index = 0
         self.objects.dot_count(self.board)
 
@@ -262,6 +271,19 @@ class GameView(arcade.View):
 
                 return
 
+    # handle mega dot collision
+    def handle_mega_dot_collision(self, hit_list):
+        for mega_dot in hit_list:
+            self.state.collect_mega_dot()
+            self.add_score(50)
+            mega_dot.remove_from_sprite_lists()
+
+            if DEBUG:
+                print(
+                    f"Score: {self.state.current_score}, "
+                    f"Mega Dots eaten: {self.state.mega_dots_eaten}"
+                )
+
     def add_score(self, points):
         self.state.add_score(points)
 
@@ -285,6 +307,13 @@ class GameView(arcade.View):
 
         if hit_dots:
             self.handle_dot_collision(hit_dots)
+
+        hit_mega_dots = arcade.check_for_collision_with_list(
+            self.pacman, self.objects.mega_dot_list
+        )
+
+        if hit_mega_dots:
+            self.handle_mega_dot_collision(hit_mega_dots)
 
         self.objects.fruit_list.update(delta_time=delta_time)
 
