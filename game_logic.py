@@ -24,7 +24,7 @@ from board.ghosts.clyde import Clyde
 
 from pacman import Pacman
 
-from board.screens import StartView, GameOverView
+from board.screens import StartView, GameOverView, Leaderboard
 
 from config import (
     BOARD_WIDTH,
@@ -37,6 +37,11 @@ from config import (
     DEBUG,
 )
 
+class GameText:
+    """Initialize various text objects in game"""
+
+    def __init__(self):
+        self.leaderboard = Leaderboard()
 
 class GameState:
     """Initialize game state variables"""
@@ -163,6 +168,7 @@ class GameView(arcade.View):
         # ---------- sprites --------------
         # pacman
         self.sprites = arcade.SpriteList()
+
         # Fruits
         self.objects.dot_list = arcade.SpriteList()
         self.objects.mega_dot_list = arcade.SpriteList()
