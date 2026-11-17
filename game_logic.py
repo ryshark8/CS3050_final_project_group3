@@ -37,12 +37,6 @@ from config import (
     DEBUG,
 )
 
-class GameText:
-    """Initialize various text objects in game"""
-
-    def __init__(self):
-        self.leaderboard = Leaderboard()
-
 class GameState:
     """Initialize game state variables"""
 
@@ -149,6 +143,7 @@ class GameView(arcade.View):
         self.state = GameState()
         self.physics = GamePhysics()
         self.objects = GameObjects()
+        self.username = ""
 
         self.board = None
         self.pacman = None
@@ -389,20 +384,22 @@ class GameView(arcade.View):
         # move pacman
         self.pacman.on_key_press(symbol, modifiers)
 
-    def start_game(self, window):
+    def start_game(self, window, username):
         """start a new game"""
         game = GameView()
+        game.username = username
         game.setup()
         window.show_view(game)
 
     def display_start_screen(self, window):
         """display the start screen"""
-        start_view = StartView(lambda: self.start_game(window))
-        window.show_view(start_view)
+        self.start_view = StartView(lambda username: self.start_game(window, username))
+        window.show_view(self.start_view)
 
     def display_game_over(self, window):
         """display the game over screen"""
-        game_over = GameOverView(lambda: self.start_game(window))
+        game_over = GameOverView(lambda username: self.start_game(window, username), self.username,
+                                 self.state.current_score)
         window.show_view(game_over)
 
 
