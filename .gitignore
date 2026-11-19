@@ -5,6 +5,9 @@
 __pycache__
 **/__pycache__/
 
+# ross's todo list
+todo.md
+
 ### macOS ###
 # General
 .DS_Store
