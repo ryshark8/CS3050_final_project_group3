@@ -247,6 +247,8 @@ class GameView(arcade.View):
             if ghost:  # is frightened
                 # respawn the ghost
                 # add to the score
+                if DEBUG:
+                    print("Pacman hit a ghost, now he has to die.")
                 self.pacman.loose_life()
                 arcade.play_sound(self.death) # putting this here to test it
             else:
@@ -259,6 +261,9 @@ class GameView(arcade.View):
             self.add_score(10)
             dot.remove_from_sprite_lists()
 
+            # play the sound effect!!!!
+            arcade.play_sound(self.chomp)
+
             if DEBUG:
                 print(
                     f"Score: {self.state.current_score}, "
@@ -269,11 +274,9 @@ class GameView(arcade.View):
             # so when you eat 70 one spawns and when you eat 157 one spawns
             # In the real game it is 170, but we do not have enough dots on the board
             # there are 157 dots on the board
-            if self.state.dots_eaten in (70, 150):
+            if self.state.dots_eaten in (70, 140):
                 self.spawn_fruit()
 
-            if self.state.dots_eaten % 2 == 1:
-                arcade.play_sound(self.chomp)
 
             if (self.state.dots_eaten + self.state.mega_dots_eaten) == self.objects.num_dots:
                 self.state.advance_level()
@@ -289,6 +292,9 @@ class GameView(arcade.View):
             self.state.collect_mega_dot()
             self.add_score(50)
             mega_dot.remove_from_sprite_lists()
+
+            # play the sound effect!!!!
+            arcade.play_sound(self.chomp)
 
             if DEBUG:
                 print(
@@ -369,7 +375,6 @@ class GameView(arcade.View):
         Normally, you'll call update() on the sprite lists that
         need it.
         """
-
         if self.pacman.is_dying:
             self.pacman.update_death(delta_time)
 
@@ -418,11 +423,12 @@ class GameView(arcade.View):
 
     def display_game_over(self, window):
         """display the game over screen"""
+        self.theme = arcade.load_sound("sounds/theme.mp3")
+        self.theme_player = arcade.play_sound(self.theme, loop=True)
+
         game_over = GameOverView(lambda username: self.start_game(window, username),
                                  self.username, self.state.current_score)
         window.show_view(game_over)
-        self.theme_player = arcade.play_sound(self.theme, loop=True)
-
 
 def main():
     """Main function"""

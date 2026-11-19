@@ -78,7 +78,7 @@ class StartView(arcade.View):
 
         # Start game on enter
         if symbol == arcade.key.ENTER:
-            self.start_game()
+            self.start_game(self.username_input.text)
             if DEBUG:
                 print("enter hit")
             if self.username.strip():

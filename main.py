@@ -1,5 +1,4 @@
 import arcade
-
 from config import *
 from game_logic import GameView
 

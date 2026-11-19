@@ -39,4 +39,4 @@ LINE_COLOR = (40, 50, 255)
 FILL_COLOR = (10, 10, 100)
 
 # Debug constant
-DEBUG = True
+DEBUG = False

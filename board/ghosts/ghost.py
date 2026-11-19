@@ -20,6 +20,8 @@ class Ghost(arcade.Sprite):
     CHASE_TIME_TOTAL = 20
     SCATTER = [5, 5, 7, 7]
 
+    REPATH_COOLDOWN = 0.25
+
     """
     Mode represents state of the ghosts in the game which are triggered by different events.
     Each mode has an associated movement pattern and/or texture
@@ -58,6 +60,8 @@ class Ghost(arcade.Sprite):
         self.animation_timer = 0
         self.move_timer = 0
         self.speed = 2
+
+        self.repath_cooldown = 0
 
         # for jail functionality
         self.jail_time = None
@@ -133,6 +137,7 @@ class Ghost(arcade.Sprite):
         self.move_timer += delta_time
         self.elapsed_time += delta_time
         self.animation_timer += delta_time
+        self.repath_cooldown -= delta_time
 
     def jail(self, pacman_pos):
         """
@@ -151,14 +156,6 @@ class Ghost(arcade.Sprite):
         sign = (distance > 0) - (distance < 0)
         self.center_y += speed * sign
 
-        # to help avoid not having a path once chasing starts
-        if self.path is None and self.elapsed_time >= self.jail_time // 2:
-            self.path = arcade.astar_calculate_path(
-                start_point=self.position,
-                end_point=pacman_pos,
-                astar_barrier_list=self.barrier_list,
-                diagonal_movement=False,
-            )
 
         return ("y", distance)
 
@@ -199,19 +196,37 @@ class Ghost(arcade.Sprite):
         """
         I have just done BFS for a video game :/
         """
+        gs = self.barrier_list.grid_size
+
         start = self.snap_to_open_cell(start_pos)
-        end = self.snap_to_open_cell(end_pos)
-        if start is None or end is None:
+        if start is None:
             return None
+
+        # CHANGED: the raw target cell, used for "closest reachable cell"
+        # if the snapped target is missing or unreachable
+        target = (round(end_pos[0] / gs), round(end_pos[1] / gs))
+        end = self.snap_to_open_cell(end_pos)
 
         blocked = self.blocked_cells()
         came_from = {start: None}
         queue = deque([start])
 
+        # track the cell nearest the target as we go
+        def dist_to_target(c):
+            return abs(c[0] - target[0]) + abs(c[1] - target[1])
+
+        closest = start
+        closest_dist = dist_to_target(start)
+
         while queue:
             current = queue.popleft()
             if current == end:
                 break
+
+            d = dist_to_target(current)
+            if d < closest_dist:
+                closest, closest_dist = current, d
+
             for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 nxt = (current[0] + dx, current[1] + dy)
                 if nxt in came_from or nxt in blocked or not self.in_bounds(nxt):
@@ -219,10 +234,10 @@ class Ghost(arcade.Sprite):
                 came_from[nxt] = current
                 queue.append(nxt)
 
-        if end not in came_from:
-            return None
+        # Fall back to the closest reachable cell.
+        if end is None or end not in came_from:
+            end = closest
 
-        gs = self.barrier_list.grid_size
         path = []
         cell = end
         while cell is not None:
@@ -252,11 +267,21 @@ class Ghost(arcade.Sprite):
         return self.move()
 
 
+    def can_repath(self):
+        """
+        True if this ghost is allowed to run find_path this frame
+        doing this because I was calling it too often, making the
+        frames slow down a ton
+        """
+        return self.new_path and self.repath_cooldown <= 0
+
+
 # ------------- movement -------------------
 
     def chase(self, pacman_pos):
         # check to see if we need new path
-        if self.new_path:
+        if self.can_repath():
+            self.repath_cooldown = self.REPATH_COOLDOWN
             path = self.find_path(self.position, pacman_pos)
 
             # if find_path returns None keep the old path
@@ -276,10 +301,11 @@ class Ghost(arcade.Sprite):
 
     def scatter(self):
         """
-        function that dictates movement for "scatter mode" i.e when ghosts are returning to
+        "scatter mode" i.e when ghosts are returning to
         their own corners briefly in between chase sessions
         """
-        if self.new_path:
+        if self.can_repath():
+            self.repath_cooldown = self.REPATH_COOLDOWN
             x = random.randint(
                 self.assigned_corner["left"], self.assigned_corner["right"]
             )
