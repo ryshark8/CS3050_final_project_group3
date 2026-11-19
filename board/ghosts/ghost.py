@@ -2,6 +2,7 @@
 
 import random
 from enum import Enum
+from collections import deque
 import arcade
 from config import TILE_SIZE
 
@@ -51,6 +52,7 @@ class Ghost(arcade.Sprite):
         self.size = (TILE_SIZE * 2, TILE_SIZE * 2)
 
         self.barrier_list = None
+        self._blocked = None # caching a set of cells that are blocked
 
         self.elapsed_time = 0
         self.animation_timer = 0
@@ -101,6 +103,13 @@ class Ghost(arcade.Sprite):
 
                 if self.elapsed_time >= self.jail_time:
                     self.mode = self.Mode.CHASE
+                    # clear the jail movement state, was fucking up path finding
+                    # I think lol
+                    self.destination = None
+                    self.path = None
+                    self.path_index = 0
+                    self.new_path = True
+                    self.move_timer = 0
                     return
 
                 direction = self.jail(pacman_pos)
@@ -153,24 +162,117 @@ class Ghost(arcade.Sprite):
 
         return ("y", distance)
 
-    def chase(self, pacman_pos):
-        on_node = self.destination is None or tuple(self.position) == tuple(self.destination)
+    # ------------- path finding helpers  --------------------
 
-        if on_node:
-            target = (round(pacman_pos[0] / TILE_SIZE) * TILE_SIZE,
-                      round(pacman_pos[1] / TILE_SIZE) * TILE_SIZE)
+    def blocked_cells(self):
+        if self._blocked is None:
+            self._blocked = set(self.barrier_list.barrier_list)
+        return self._blocked
 
-            path = arcade.astar_calculate_path(
-                start_point=self.position,
-                end_point=target,   # make the target NOT pacmans position
-                astar_barrier_list=self.barrier_list,
-                diagonal_movement=False,
-            )
-            if path:
-                standing = tuple(path[0]) == tuple(self.position)
-                self.destination = path[1] if standing and len(path) > 1 else path[0]
+    def in_bounds(self, cell):
+        """Wether a cell is in bounds or in the barrier list"""
+        bl = self.barrier_list
+        return bl.left <= cell[0] <= bl.right and bl.bottom <= cell[1] <= bl.top
+
+    def snap_to_open_cell(self, pos, max_radius=2):
+        """
+        return the nearest cell in grid units that is not a wall
+        or None, have to do this to stop the jitter that was happening when A*
+        failed
+        """
+        gs = self.barrier_list.grid_size
+        blocked = self.blocked_cells()
+
+        cx, cy = round(pos[0] / gs), round(pos[1] / gs)
+        best, best_dist = None, float("inf")
+        for dx in range(-max_radius, max_radius + 1):
+            for dy in range(-max_radius, max_radius + 1):
+                cell = (cx + dx, cy + dy)
+                if cell in blocked or not self.in_bounds(cell):
+                    continue
+                dist = abs(cell[0] * gs - pos[0]) + abs(cell[1] * gs - pos[1])
+                if dist < best_dist:
+                    best, best_dist = cell, dist
+        return best
+
+    def find_path(self, start_pos, end_pos):
+        """
+        I have just done BFS for a video game :/
+        """
+        start = self.snap_to_open_cell(start_pos)
+        end = self.snap_to_open_cell(end_pos)
+        if start is None or end is None:
+            return None
+
+        blocked = self.blocked_cells()
+        came_from = {start: None}
+        queue = deque([start])
+
+        while queue:
+            current = queue.popleft()
+            if current == end:
+                break
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nxt = (current[0] + dx, current[1] + dy)
+                if nxt in came_from or nxt in blocked or not self.in_bounds(nxt):
+                    continue
+                came_from[nxt] = current
+                queue.append(nxt)
+
+        if end not in came_from:
+            return None
+
+        gs = self.barrier_list.grid_size
+        path = []
+        cell = end
+        while cell is not None:
+            path.append((cell[0] * gs, cell[1] * gs))
+            cell = came_from[cell]
+        path.reverse()
+        return path
+
+    def set_path(self, path):
+        """start following the new path"""
+        self.path = path
+        self.path_index = 0
+        self.destination = path[0]
+
+    def follow_path(self):
+        """ Move on the current path """
+        if self.path is None:
+            return ("x", 0)
+
+        if self.position == self.destination:
+            if self.path_index < len( self.path) - 1:
+                self.path_index += 1
+                self.destination = self.path[self.path_index]
+            else:
+                self.new_path = True
 
         return self.move()
+
+
+# ------------- movement -------------------
+
+    def chase(self, pacman_pos):
+        # check to see if we need new path
+        if self.new_path:
+            path = self.find_path(self.position, pacman_pos)
+
+            # if find_path returns None keep the old path
+            # and continure to follow it
+            if path:
+                self.set_path(path)
+
+            self.new_path = False
+
+        direction = self.follow_path()
+
+        if self.move_timer >= self.CHASE_TIME_ITER:
+            self.move_timer = 0
+            self.new_path = True
+
+        return direction
 
     def scatter(self):
         """
@@ -184,32 +286,21 @@ class Ghost(arcade.Sprite):
             y = random.randint(
                 self.assigned_corner["bottom"], self.assigned_corner["top"]
             )
-            self.path = arcade.astar_calculate_path(
-                start_point=self.position,
-                end_point=(x, y),
-                astar_barrier_list=self.barrier_list,
-                diagonal_movement=False,
-            )
+            path = self.find_path(self.position, (x,y))
+
+            if path:
+                self.set_path(path)
+                self.new_path = False
+            # else here would be when it is in a wall
+
             self.chase_timer = 0
-            self.path_index = 0
-            self.new_path = False
 
-        self.destination = self.path[self.path_index]
+        direction = self.follow_path()
 
-        # check to see if we've reached the next point on the path
-        if self.position == self.destination:
-            self.path_index += 1
-            self.destination = self.path[self.path_index]
-
-        direction = self.move()
-
-        # check to see if we should go back to chasing yet
+        # check if we should go back to chasing yet
         if self.move_timer >= self.SCATTER[1]:
             self.mode = self.Mode.CHASE
             self.move_timer = 0
-            self.new_path = True
-
-        elif self.position == self.path[-1]:
             self.new_path = True
 
         return direction
