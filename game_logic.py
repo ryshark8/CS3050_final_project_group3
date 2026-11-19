@@ -24,7 +24,7 @@ from board.ghosts.clyde import Clyde
 
 from pacman import Pacman
 
-from board.screens import StartView, GameOverView
+from board.screens import StartView, GameOverView, Leaderboard
 
 from config import (
     BOARD_WIDTH,
@@ -37,7 +37,6 @@ from config import (
     DEBUG,
 )
 
-
 class GameState:
     """Initialize game state variables"""
 
@@ -46,11 +45,13 @@ class GameState:
         self.current_level = 0
         self.current_score = 0
         self.dots_eaten = 0
+        self.mega_dots_eaten = 0
 
     # Initialize for each level
     def initialize_level(self):
+        # score is intentionally NOT reset here so it carries over between levels
         self.dots_eaten = 0
-        self.current_score = 0
+        self.mega_dots_eaten = 0
 
     # Update current score
     def add_score(self, points):
@@ -58,6 +59,9 @@ class GameState:
 
     def collect_dot(self):
         self.dots_eaten += 1
+
+    def collect_mega_dot(self):
+        self.mega_dots_eaten += 1
 
     def advance_level(self):
         if self.current_level < len(self.levels) - 1:
@@ -107,11 +111,13 @@ class GameObjects:
     def __init__(self):
         self.fruit_list = None
         self.dot_list = None
+        self.mega_dot_list = None
         self.num_dots = None
 
     def dot_count(self, board):
         self.dot_list = board.dot_list
-        self.num_dots = len(self.dot_list)
+        self.mega_dot_list = board.mega_dot_list
+        self.num_dots = len(self.dot_list) + len(self.mega_dot_list)
 
     def spawn_fruit(self, current_level, position):
 
@@ -137,6 +143,7 @@ class GameView(arcade.View):
         self.state = GameState()
         self.physics = GamePhysics()
         self.objects = GameObjects()
+        self.username = ""
 
         self.board = None
         self.pacman = None
@@ -156,11 +163,21 @@ class GameView(arcade.View):
         # ---------- sprites --------------
         # pacman
         self.sprites = arcade.SpriteList()
+
         # Fruits
         self.objects.dot_list = arcade.SpriteList()
+        self.objects.mega_dot_list = arcade.SpriteList()
         self.objects.fruit_list = arcade.SpriteList()
 
+        # Sound Effects
+        self.chomp = arcade.load_sound("sounds/chomp.wav")
+        self.death = arcade.load_sound("sounds/death.wav")
+        self.eat_fruit = arcade.load_sound("sounds/eatfruit.wav")
+        self.eat_ghost = arcade.load_sound("sounds/eatghost.wav")
+
+
         self.state.dots_eaten = 0
+        self.state.mega_dots_eaten = 0
         self.next_fruit_index = 0
         self.objects.dot_count(self.board)
 
@@ -230,7 +247,8 @@ class GameView(arcade.View):
             if ghost:  # is frightened
                 # respawn the ghost
                 # add to the score
-                self.pacman.loose_life()  # putting this here to test it
+                self.pacman.loose_life()
+                arcade.play_sound(self.death) # putting this here to test it
             else:
                 pass
 
@@ -251,16 +269,32 @@ class GameView(arcade.View):
             # so when you eat 70 one spawns and when you eat 157 one spawns
             # In the real game it is 170, but we do not have enough dots on the board
             # there are 157 dots on the board
-            if self.state.dots_eaten in (70, 157):
+            if self.state.dots_eaten in (70, 150):
                 self.spawn_fruit()
 
-            if self.state.dots_eaten == self.objects.num_dots:
+            if self.state.dots_eaten % 2 == 1:
+                arcade.play_sound(self.chomp)
+
+            if (self.state.dots_eaten + self.state.mega_dots_eaten) == self.objects.num_dots:
                 self.state.advance_level()
 
                 if self.state.current_level < len(self.state.levels):
                     self.reset()
 
                 return
+
+    # handle mega dot collision
+    def handle_mega_dot_collision(self, hit_list):
+        for mega_dot in hit_list:
+            self.state.collect_mega_dot()
+            self.add_score(50)
+            mega_dot.remove_from_sprite_lists()
+
+            if DEBUG:
+                print(
+                    f"Score: {self.state.current_score}, "
+                    f"Mega Dots eaten: {self.state.mega_dots_eaten}"
+                )
 
     def add_score(self, points):
         self.state.add_score(points)
@@ -286,6 +320,13 @@ class GameView(arcade.View):
         if hit_dots:
             self.handle_dot_collision(hit_dots)
 
+        hit_mega_dots = arcade.check_for_collision_with_list(
+            self.pacman, self.objects.mega_dot_list
+        )
+
+        if hit_mega_dots:
+            self.handle_mega_dot_collision(hit_mega_dots)
+
         self.objects.fruit_list.update(delta_time=delta_time)
 
         self.objects.fruit_list.update(delta_time=delta_time)
@@ -296,6 +337,7 @@ class GameView(arcade.View):
 
         for fruit in hit_fruits:
             self.add_score(fruit.points)
+            arcade.play_sound(self.eat_fruit)
             fruit.remove_from_sprite_lists()
 
             if DEBUG:
@@ -355,21 +397,31 @@ class GameView(arcade.View):
         # move pacman
         self.pacman.on_key_press(symbol, modifiers)
 
-    def start_game(self, window):
+    def start_game(self, window, username):
         """start a new game"""
+        if getattr(self, "theme_player", None):
+            arcade.stop_sound(self.theme_player)
+            self.theme_player = None
+
         game = GameView()
+        game.username = username
         game.setup()
         window.show_view(game)
 
     def display_start_screen(self, window):
         """display the start screen"""
-        start_view = StartView(lambda: self.start_game(window))
-        window.show_view(start_view)
+        self.theme = arcade.load_sound("sounds/theme.mp3")
+        self.theme_player = arcade.play_sound(self.theme, loop=True)
+
+        self.start_view = StartView(lambda username: self.start_game(window, username))
+        window.show_view(self.start_view)
 
     def display_game_over(self, window):
         """display the game over screen"""
-        game_over = GameOverView(lambda: self.start_game(window))
+        game_over = GameOverView(lambda username: self.start_game(window, username),
+                                 self.username, self.state.current_score)
         window.show_view(game_over)
+        self.theme_player = arcade.play_sound(self.theme, loop=True)
 
 
 def main():

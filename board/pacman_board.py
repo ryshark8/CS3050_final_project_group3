@@ -7,6 +7,7 @@ import arcade
 from config import *
 from board.walls import build_walls
 from board.dots_and_fruits.dots import Dot
+from board.dots_and_fruits.mega_dots import MegaDot
 
 tile_size = TILE_SIZE
 label_size = LABEL_SIZE
@@ -36,6 +37,9 @@ class PacmanBoard:
 
         self.dots = Dot()
         self.dot_list = self.dots.create_dots(level)
+
+        self.mega_dots = MegaDot()
+        self.mega_dot_list = self.mega_dots.create_mega_dots(level)
 
         self.wall_list, self.ghost_wall_list = build_walls(maze, tile_size, cell_center)
 
@@ -126,6 +130,7 @@ class PacmanBoard:
 
     def draw_dots(self):
         self.dot_list.draw()
+        self.mega_dot_list.draw()
 
     def draw(self):
         self.draw_maze()
