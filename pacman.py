@@ -199,7 +199,8 @@ class Pacman(arcade.Sprite):
             if is_reverse or self._try_turn(self.next_direction):
                 if DEBUG:
                     print(
-                        f"turn taken: {self.next_direction[:2]} at ({self.center_x:.0f}, {self.center_y:.0f})"
+                        f"turn taken: {self.next_direction[:2]} at "
+                        f"({self.center_x:.0f}, {self.center_y:.0f})"
                     )
                 self._set_direction(self.next_direction)
                 self.next_direction = (0, 0, 0)  # consume it
@@ -209,7 +210,8 @@ class Pacman(arcade.Sprite):
         if (dx, dy) != (0, 0) and self._blocked(dx, dy):
             if DEBUG:
                 print(
-                    f"STOPPED by update check: dir=({dx},{dy}) at ({self.center_x:.0f}, {self.center_y:.0f})"
+                    f"STOPPED by update check: dir=({dx},{dy}) at"
+                    f" ({self.center_x:.0f}, {self.center_y:.0f})"
                 )
             self.change_x = 0
             self.change_y = 0
